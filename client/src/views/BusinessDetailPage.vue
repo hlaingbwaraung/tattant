@@ -1,0 +1,590 @@
+<template>
+  <div class="business-detail-page">
+    <AppHeader />
+
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading business details...</p>
+    </div>
+
+    <div v-else-if="error" class="error-container">
+      <div class="error-icon">⚠️</div>
+      <p class="error">{{ error }}</p>
+      <router-link to="/" class="back-btn">← Back to Home</router-link>
+    </div>
+
+    <div v-else-if="business" class="business-detail">
+      <!-- Hero Image -->
+      <div class="business-hero">
+        <img :src="business.photos?.[0] || 'https://via.placeholder.com/1200x400'" :alt="business.name" />
+        <div class="hero-overlay"></div>
+      </div>
+
+      <div class="container">
+        <div class="breadcrumb">
+          <router-link to="/">Home</router-link>
+          <span class="separator">/</span>
+          <span class="current">{{ business.name }}</span>
+        </div>
+
+        <div class="business-content">
+          <div class="main-content">
+            <div class="title-section">
+              <h1 class="business-name">{{ business.name }}</h1>
+              <span class="price-badge">{{ business.price_range }}</span>
+            </div>
+            
+            <div class="business-meta">
+              <span class="languages">🌐 {{ business.languages_supported?.join(', ') }}</span>
+            </div>
+
+            <div class="business-tags">
+              <span v-for="tag in business.tags" :key="tag" class="tag">{{ tag }}</span>
+            </div>
+
+            <div class="section">
+              <h2>About</h2>
+              <p>{{ business.description_en }}</p>
+            </div>
+
+            <div v-if="business.opening_hours" class="section">
+              <h2>Opening Hours</h2>
+              <div class="opening-hours">
+                <div v-for="(hours, day) in business.opening_hours" :key="day" class="hours-row">
+                  <span class="day">{{ day.toUpperCase() }}</span>
+                  <span class="hours">{{ hours }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2>Location</h2>
+              <p class="address">📍 {{ business.address }}</p>
+            </div>
+
+            <div v-if="business.phone" class="section">
+              <h2>Contact</h2>
+              <p class="phone">📞 {{ business.phone }}</p>
+              <p v-if="business.website">
+                <a :href="business.website" target="_blank" class="website-link">🌐 Visit Website →</a>
+              </p>
+            </div>
+          </div>
+
+          <div class="sidebar">
+            <div class="action-card">
+              <h3>Quick Actions</h3>
+              <button 
+                @click="handleToggleFavorite" 
+                :disabled="!isAuthenticated || isSaving"
+                class="action-btn save-btn"
+                :class="{ 'saved': isSaved }"
+              >
+                <span class="btn-icon">{{ isSaved ? '❤️' : '🤍' }}</span>
+                {{ isSaved ? 'Saved to Favorites' : 'Save to Favorites' }}
+              </button>
+              <button class="action-btn share-btn" @click="handleShare">
+                <span class="btn-icon">📤</span>
+                Share Business
+              </button>
+              <p v-if="!isAuthenticated" class="login-hint">
+                <router-link to="/login">Login</router-link> to save favorites
+              </p>
+            </div>
+
+            <div v-if="business.photos && business.photos.length > 1" class="photos-card">
+              <h3>Photos</h3>
+              <div class="photo-grid">
+                <img 
+                  v-for="(photo, index) in business.photos.slice(1, 5)" 
+                  :key="index"
+                  :src="photo" 
+                  :alt="`${business.name} - ${index}`"
+                />
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>Quick Info</h3>
+              <div class="info-row">
+                <span class="info-label">Price Range</span>
+                <span class="info-value price">{{ business.price_range }}</span>
+              </div>
+              <div class="info-row" v-if="business.languages_supported">
+                <span class="info-label">Languages</span>
+                <span class="info-value">{{ business.languages_supported.length }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
+import AppHeader from '../components/layout/AppHeader.vue'
+import { saveBusiness, unsaveBusiness, checkIfSaved } from '../services/favoriteService'
+import { useAuthStore } from '../store/auth'
+
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+const business = ref(null)
+const loading = ref(true)
+const error = ref('')
+const isSaved = ref(false)
+const isSaving = ref(false)
+
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+
+const handleToggleFavorite = async () => {
+  if (!isAuthenticated.value) {
+    router.push('/login')
+    return
+  }
+
+  isSaving.value = true
+  try {
+    if (isSaved.value) {
+      await unsaveBusiness(business.value.id)
+      isSaved.value = false
+    } else {
+      await saveBusiness(business.value.id)
+      isSaved.value = true
+    }
+  } catch (err) {
+    console.error('Error toggling favorite:', err)
+    alert(err.response?.data?.message || 'Failed to update favorites')
+  } finally {
+    isSaving.value = false
+  }
+}
+
+const handleShare = async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href)
+    alert('Link copied to clipboard!')
+  } catch (err) {
+    console.error('Error sharing:', err)
+  }
+}
+
+onMounted(async () => {
+  const id = route.params.id
+
+  try {
+    const response = await axios.get(`http://localhost:5000/api/businesses/${id}`)
+    business.value = response.data
+
+    if (isAuthenticated.value) {
+      try {
+        const savedResponse = await checkIfSaved(id)
+        isSaved.value = savedResponse.data.isSaved
+      } catch (err) {
+        console.error('Error checking saved status:', err)
+      }
+    }
+  } catch (err) {
+    error.value = 'Failed to load business details. Please try again later.'
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+})
+</script>
+
+<style scoped>
+.business-detail-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Loading & Error */
+.loading-container,
+.error-container {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid var(--border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  color: var(--text-secondary);
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.error {
+  color: var(--color-error);
+  margin-bottom: 1.5rem;
+}
+
+.back-btn {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity var(--transition-fast);
+}
+
+.back-btn:hover {
+  opacity: 0.8;
+}
+
+/* Hero Image */
+.business-hero {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+}
+
+.business-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, var(--bg-primary) 100%);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  padding: 1.5rem 0;
+  font-size: 0.875rem;
+}
+
+.breadcrumb a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.breadcrumb a:hover {
+  opacity: 0.8;
+}
+
+.breadcrumb .separator {
+  color: var(--text-muted);
+  margin: 0 0.5rem;
+}
+
+.breadcrumb .current {
+  color: var(--text-secondary);
+}
+
+/* Content Layout */
+.business-content {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+  padding-bottom: 4rem;
+}
+
+/* Main Content */
+.main-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+}
+
+.title-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.business-name {
+  font-size: 2rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  flex: 1;
+}
+
+.price-badge {
+  background: var(--color-primary-gradient);
+  color: #1a1a2e;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.business-meta {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+.business-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.tag {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.section p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.opening-hours {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+}
+
+.hours-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.hours-row:last-child {
+  border-bottom: none;
+}
+
+.day {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.hours {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.address,
+.phone {
+  color: var(--text-secondary);
+}
+
+.website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity var(--transition-fast);
+}
+
+.website-link:hover {
+  opacity: 0.8;
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.action-card,
+.photos-card,
+.info-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+}
+
+.action-card h3,
+.photos-card h3,
+.info-card h3 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.action-btn:last-of-type {
+  margin-bottom: 0;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  font-size: 1.125rem;
+}
+
+.save-btn {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.save-btn.saved {
+  background: var(--color-primary-gradient);
+  color: #1a1a2e;
+}
+
+.share-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.login-hint {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+}
+
+.login-hint a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.photo-grid img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  transition: transform var(--transition-fast);
+}
+
+.photo-grid img:hover {
+  transform: scale(1.05);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.info-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.info-value.price {
+  background: var(--color-primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@media (max-width: 968px) {
+  .business-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .business-hero {
+    height: 300px;
+  }
+  
+  .business-name {
+    font-size: 1.5rem;
+  }
+  
+  .title-section {
+    flex-direction: column;
+  }
+}
+</style>

@@ -1,0 +1,91 @@
+{
+  "nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "about": "About Japan",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "favorites": "Favorites",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "home": {
+    "title": "Discover Japan",
+    "subtitle": "Your guide to essential services and businesses in Japan",
+    "searchPlaceholder": "Search for businesses, restaurants, services...",
+    "categories": "Browse by Category",
+    "featured": "Featured Businesses"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "confirmPassword": "Confirm Password",
+    "login": "Login",
+    "register": "Register",
+    "loginWithGoogle": "Login with Google",
+    "registerWithGoogle": "Register with Google",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "registerNow": "Register now",
+    "loginNow": "Login now"
+  },
+  "business": {
+    "viewDetails": "View Details",
+    "openNow": "Open Now",
+    "closed": "Closed",
+    "priceRange": "Price Range",
+    "phone": "Phone",
+    "website": "Website",
+    "directions": "Get Directions",
+    "hours": "Opening Hours",
+    "languages": "Languages Spoken",
+    "tags": "Tags",
+    "noResults": "No businesses found"
+  },
+  "filters": {
+    "search": "Search",
+    "category": "Category",
+    "openNow": "Open Now",
+    "distance": "Distance",
+    "priceRange": "Price Range",
+    "filter": "Filter",
+    "clearFilters": "Clear Filters"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "save": "Save",
+    "saved": "Saved",
+    "remove": "Remove",
+    "empty": "You haven't saved any businesses yet"
+  },
+  "profile": {
+    "title": "Profile Settings",
+    "updateProfile": "Update Profile",
+    "language": "Preferred Language",
+    "emailNotifications": "Email Notifications",
+    "save": "Save Changes"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next"
+  },
+  "footer": {
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© 2026 Tattant. All rights reserved."
+  }
+}
