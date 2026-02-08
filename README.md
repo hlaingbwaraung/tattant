@@ -1,4 +1,4 @@
-﻿# suteki - Japan Tourist Guide Platform
+# suteki - Japan Tourist Guide Platform
 
 A modern, mobile-first platform for first-time visitors to Japan. Built with Vue.js and Node.js.
 
@@ -112,30 +112,30 @@ After running the seed script:
 
 ```
 suteki/
-â”œâ”€â”€ client/                 # Vue.js frontend
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ components/    # Reusable components
-â”‚   â”‚   â”œâ”€â”€ views/         # Page components
-â”‚   â”‚   â”œâ”€â”€ router/        # Vue Router
-â”‚   â”‚   â”œâ”€â”€ store/         # Pinia stores
-â”‚   â”‚   â”œâ”€â”€ services/      # API services
-â”‚   â”‚   â”œâ”€â”€ i18n/          # Translations
-â”‚   â”‚   â””â”€â”€ ...
-â”‚   â””â”€â”€ package.json
-â”‚
-â”œâ”€â”€ server/                # Node.js backend
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ config/        # Configs
-â”‚   â”‚   â”œâ”€â”€ models/        # Database models
-â”‚   â”‚   â”œâ”€â”€ controllers/   # Route controllers
-â”‚   â”‚   â”œâ”€â”€ routes/        # API routes
-â”‚   â”‚   â”œâ”€â”€ middleware/    # Middleware
-â”‚   â”‚   â”œâ”€â”€ migrations/    # DB migrations
-â”‚   â”‚   â”œâ”€â”€ seeders/       # Seed data
-â”‚   â”‚   â””â”€â”€ server.js      # Entry point
-â”‚   â””â”€â”€ package.json
-â”‚
-â””â”€â”€ README.md
+├── client/                 # Vue.js frontend
+│   ├── src/
+│   │   ├── components/    # Reusable components
+│   │   ├── views/         # Page components
+│   │   ├── router/        # Vue Router
+│   │   ├── store/         # Pinia stores
+│   │   ├── services/      # API services
+│   │   ├── i18n/          # Translations
+│   │   └── ...
+│   └── package.json
+│
+├── server/                # Node.js backend
+│   ├── src/
+│   │   ├── config/        # Configs
+│   │   ├── models/        # Database models
+│   │   ├── controllers/   # Route controllers
+│   │   ├── routes/        # API routes
+│   │   ├── middleware/    # Middleware
+│   │   ├── migrations/    # DB migrations
+│   │   ├── seeders/       # Seed data
+│   │   └── server.js      # Entry point
+│   └── package.json
+│
+└── README.md
 ```
 
 ## Database Schema
@@ -187,28 +187,28 @@ See migrations in `server/src/migrations/` for detailed schema.
 ## Development Status
 
 **Completed:**
-- âœ… Project setup (Vue 3 + Express)
-- âœ… Database schema and migrations
-- âœ… Tailwind CSS configuration
-- âœ… Vue Router with protected routes
-- âœ… Pinia stores (auth, business, category, favorite)
-- âœ… i18n with 4 languages
-- âœ… API service layer
-- âœ… Seed data (categories and businesses)
+- ✅ Project setup (Vue 3 + Express)
+- ✅ Database schema and migrations
+- ✅ Tailwind CSS configuration
+- ✅ Vue Router with protected routes
+- ✅ Pinia stores (auth, business, category, favorite)
+- ✅ i18n with 4 languages
+- ✅ API service layer
+- ✅ Seed data (categories and businesses)
 
 **In Progress:**
-- ðŸ”„ Authentication controllers
-- ðŸ”„ Business and category routes
-- ðŸ”„ Vue components
-- ðŸ”„ Google OAuth integration
+- 🔄 Authentication controllers
+- 🔄 Business and category routes
+- 🔄 Vue components
+- 🔄 Google OAuth integration
 
 **Planned (MVP):**
-- â³ All page components
-- â³ Google Maps integration
-- â³ Email verification
-- â³ Password reset flow
-- â³ Responsive design polish
-- â³ Testing and deployment
+- ⏳ All page components
+- ⏳ Google Maps integration
+- ⏳ Email verification
+- ⏳ Password reset flow
+- ⏳ Responsive design polish
+- ⏳ Testing and deployment
 
 ## Contributing
 

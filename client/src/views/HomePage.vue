@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="home-page">
     <AppHeader />
 
@@ -25,15 +25,15 @@
         
         <!-- Language Selector -->
         <div class="language-selector">
-          <button class="lang-btn" :class="{ active: currentLang === 'en' }" @click="switchLang('en')">ðŸ‡¬ðŸ‡§ EN</button>
-          <button class="lang-btn" :class="{ active: currentLang === 'my' }" @click="switchLang('my')">ðŸ‡²ðŸ‡² á€™á€¼á€”á€ºá€™á€¬</button>
+          <button class="lang-btn" :class="{ active: currentLang === 'en' }" @click="switchLang('en')">🇬🇧 EN</button>
+          <button class="lang-btn" :class="{ active: currentLang === 'my' }" @click="switchLang('my')">🇲🇲 မြန်မာ</button>
         </div>
       </div>
       
       <!-- Floating Elements -->
-      <div class="hero-float hero-float-1">ðŸ—»</div>
-      <div class="hero-float hero-float-2">ðŸŒ¸</div>
-      <div class="hero-float hero-float-3">â›©ï¸</div>
+      <div class="hero-float hero-float-1">🗻</div>
+      <div class="hero-float hero-float-2">🌸</div>
+      <div class="hero-float hero-float-3">⛩️</div>
     </section>
 
     <!-- Categories Section -->
@@ -59,7 +59,7 @@
               <h3 class="category-name">{{ category.name }}</h3>
               <p class="category-description">{{ category.description }}</p>
             </div>
-            <div class="category-arrow">â†’</div>
+            <div class="category-arrow">→</div>
           </router-link>
         </div>
       </div>
@@ -70,22 +70,22 @@
       <div class="section-container">
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-icon">ðŸ“</div>
+            <div class="stat-icon">📍</div>
             <div class="stat-number">{{ businessCount }}+</div>
             <div class="stat-label">{{ $t('home.statsBusinesses') }}</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">ðŸ“‚</div>
+            <div class="stat-icon">📂</div>
             <div class="stat-number">{{ categoryCount }}</div>
             <div class="stat-label">{{ $t('home.statsCategories') }}</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">ðŸŒ</div>
+            <div class="stat-icon">🌐</div>
             <div class="stat-number">2</div>
             <div class="stat-label">{{ $t('home.statsLanguages') }}</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">â­</div>
+            <div class="stat-icon">⭐</div>
             <div class="stat-number">5.0</div>
             <div class="stat-label">{{ $t('home.statsRating') }}</div>
           </div>
@@ -103,17 +103,17 @@
         
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon">ðŸŽ¯</div>
+            <div class="feature-icon">🎯</div>
             <h3 class="feature-title">{{ $t('home.featureCurated') }}</h3>
             <p class="feature-description">{{ $t('home.featureCuratedDesc') }}</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">ðŸŒ</div>
+            <div class="feature-icon">🌏</div>
             <h3 class="feature-title">{{ $t('home.featureMultilingual') }}</h3>
             <p class="feature-description">{{ $t('home.featureMultilingualDesc') }}</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">ðŸ’Ž</div>
+            <div class="feature-icon">💎</div>
             <h3 class="feature-title">{{ $t('home.featurePremium') }}</h3>
             <p class="feature-description">{{ $t('home.featurePremiumDesc') }}</p>
           </div>
@@ -144,7 +144,7 @@
       <div class="section-container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <div class="footer-logo">ðŸŽŒ Suteki</div>
+            <div class="footer-logo">🎌 Suteki</div>
             <p class="footer-tagline">{{ $t('footer.tagline') }}</p>
           </div>
           <div class="footer-links">
@@ -193,12 +193,12 @@ const switchLang = (lang) => {
 }
 
 const categories = computed(() => [
-  { id: 1, slug: 'sim-cards', name: t('category.simCards'), icon: 'ï¿½', description: t('category.simCardsDesc') },
-  { id: 2, slug: 'ramen', name: t('category.ramen'), icon: 'ðŸœ', description: t('category.ramenDesc') },
-  { id: 3, slug: 'sushi', name: t('category.sushi'), icon: 'ðŸ£', description: t('category.sushiDesc') },
-  { id: 4, slug: 'yakiniku', name: t('category.yakiniku'), icon: 'ðŸ¥©', description: t('category.yakinikuDesc') },
-  { id: 5, slug: 'bookstores', name: t('category.bookstores'), icon: 'ðŸ“š', description: t('category.bookstoresDesc') },
-  { id: 6, slug: 'currency-exchange', name: t('category.currencyExchange'), icon: 'ðŸ’±', description: t('category.currencyExchangeDesc') },
+  { id: 1, slug: 'sim-cards', name: t('category.simCards'), icon: '📶', description: t('category.simCardsDesc') },
+  { id: 2, slug: 'ramen', name: t('category.ramen'), icon: '🍜', description: t('category.ramenDesc') },
+  { id: 3, slug: 'sushi', name: t('category.sushi'), icon: '🍣', description: t('category.sushiDesc') },
+  { id: 4, slug: 'yakiniku', name: t('category.yakiniku'), icon: '🥩', description: t('category.yakinikuDesc') },
+  { id: 5, slug: 'bookstores', name: t('category.bookstores'), icon: '📚', description: t('category.bookstoresDesc') },
+  { id: 6, slug: 'currency-exchange', name: t('category.currencyExchange'), icon: '💱', description: t('category.currencyExchangeDesc') },
 ])
 </script>
 

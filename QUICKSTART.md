@@ -1,4 +1,4 @@
-﻿# Quick Database Setup Guide
+# Quick Database Setup Guide
 
 ## Windows Users
 
@@ -86,12 +86,12 @@ npm run db:seed
 ## What Gets Created
 
 **6 Categories:**
-- ðŸ“¶ Telecom & SIM Cards
-- ðŸœ Ramen Restaurants
-- ðŸ£ Sushi Restaurants
-- ðŸ¥© Yakiniku & BBQ
-- ðŸ“š Book Stores
-- ðŸ’± Currency Exchange
+- 📶 Telecom & SIM Cards
+- 🍜 Ramen Restaurants
+- 🍣 Sushi Restaurants
+- 🥩 Yakiniku & BBQ
+- 📚 Book Stores
+- 💱 Currency Exchange
 
 **~10 Sample Businesses:**
 - Sakura Mobile (SIM cards)
@@ -148,11 +148,11 @@ curl http://localhost:5000/health
 
 Once database is set up:
 
-1. âœ… Database is ready
-2. â­ï¸ Start the backend: `cd server && npm run dev`
-3. â­ï¸ Build authentication controllers
-4. â­ï¸ Build API routes
-5. â­ï¸ Build frontend components
+1. ✅ Database is ready
+2. ⏭️ Start the backend: `cd server && npm run dev`
+3. ⏭️ Build authentication controllers
+4. ⏭️ Build API routes
+5. ⏭️ Build frontend components
 
 Or continue to **Phase 2: Backend Core** to implement:
 - Auth controllers (register, login, JWT)

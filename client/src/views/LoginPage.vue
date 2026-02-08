@@ -1,22 +1,22 @@
-﻿<template>
+<template>
   <div class="auth-page">
     <div class="auth-container">
       <!-- Left Side - Branding -->
       <div class="auth-branding">
-        <router-link to="/" class="brand-logo">ðŸŽŒ Suteki</router-link>
+        <router-link to="/" class="brand-logo">🎌 Suteki</router-link>
         <h1 class="brand-title">{{ $t('auth.welcomeBack') }}</h1>
         <p class="brand-subtitle">{{ $t('auth.signInSubtitle') }}</p>
         <div class="brand-features">
           <div class="brand-feature">
-            <span class="feature-icon">âœ“</span>
+            <span class="feature-icon">✓</span>
             <span>{{ $t('auth.saveFavorites') }}</span>
           </div>
           <div class="brand-feature">
-            <span class="feature-icon">âœ“</span>
+            <span class="feature-icon">✓</span>
             <span>{{ $t('auth.personalizedRecs') }}</span>
           </div>
           <div class="brand-feature">
-            <span class="feature-icon">âœ“</span>
+            <span class="feature-icon">✓</span>
             <span>{{ $t('auth.exclusiveContent') }}</span>
           </div>
         </div>
@@ -32,12 +32,12 @@
 
           <div class="test-credentials">
             <div class="test-header">
-              <span class="test-icon">ðŸ”‘</span>
+              <span class="test-icon">🔑</span>
               <span>{{ $t('auth.testAccount') }}</span>
             </div>
             <div class="test-info">
               <span>test@example.com</span>
-              <span class="test-divider">â€¢</span>
+              <span class="test-divider">•</span>
               <span>test123</span>
             </div>
           </div>
@@ -80,7 +80,7 @@
             </div>
 
             <div v-if="error" class="error-message">
-              <span class="error-icon">âš ï¸</span>
+              <span class="error-icon">⚠️</span>
               {{ error }}
             </div>
 
