@@ -1,4 +1,4 @@
-﻿{
+{
   "nav": {
     "home": "Home",
     "explore": "Explore",
@@ -95,7 +95,7 @@
     "signInHere": "Sign in here",
     "registerNow": "Register now",
     "loginNow": "Login now",
-    "backToHome": "â† Back to Home"
+    "backToHome": "← Back to Home"
   },
   "business": {
     "viewDetails": "View Details",
@@ -170,7 +170,7 @@
     "practical": "Practical",
     "loadingBlogs": "Loading blogs...",
     "noBlogs": "No blogs available yet. Check back soon!",
-    "footerText": "Â© 2026 Suteki. Your Premium Japan Guide."
+    "footerText": "© 2026 Suteki. Your Premium Japan Guide."
   },
   "filters": {
     "search": "Search",
@@ -222,12 +222,12 @@
     "contact": "Contact",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "copyright": "Â© 2026 Suteki. All rights reserved."
+    "copyright": "© 2026 Suteki. All rights reserved."
   },
   "jlpt": {
-    "badge": "JLPT N3 Quiz",
-    "title": "Learn Japanese â€”",
-    "titleHighlight": "JLPT N3",
+    "badge": "JLPT Quiz",
+    "title": "Learn Japanese —",
+    "titleHighlight": "JLPT",
     "subtitle": "Master kanji readings through fun card quiz games",
     "premiumOnly": "Premium Feature",
     "premiumDesc": "The Japanese Learning module is exclusively for Premium members. Upgrade to access JLPT quiz games, leaderboards, and track your progress.",
@@ -235,7 +235,7 @@
     "quizTab": "Quiz",
     "leaderboardTab": "Leaderboard",
     "kanjiSoundQuiz": "Kanji Reading Quiz",
-    "quizDescription": "Choose the correct reading (hiragana) for each kanji word. Test your JLPT N3 vocabulary knowledge!",
+    "quizDescription": "Choose the correct reading (hiragana) for each kanji word. Test your JLPT vocabulary knowledge!",
     "rounds": "Rounds",
     "choices": "Choices",
     "timeLimit": "15s each",
@@ -259,7 +259,7 @@
     "noScoresYet": "No scores yet. Be the first to play!",
     "beFirst": "Take the Quiz",
     "yourBest": "Your Personal Best",
-    "perfect": "Perfect! You're a kanji master! ðŸŽŒ",
+    "perfect": "Perfect! You're a kanji master! 🎌",
     "excellent": "Excellent! Almost perfect!",
     "good": "Good job! Keep it up!",
     "keepPracticing": "Not bad! Keep practicing!",
@@ -276,10 +276,10 @@
     "monthlyPlan": "Monthly Plan",
     "lifetimePlan": "Lifetime Plan",
     "monthlyDesc": "Perfect for trying out premium features",
-    "lifetimeDesc": "Best value â€” pay once, access forever",
+    "lifetimeDesc": "Best value — pay once, access forever",
     "month": "month",
     "oneTime": "one-time payment",
-    "feature1": "JLPT N3 Kanji Quiz",
+    "feature1": "JLPT Kanji Quiz",
     "feature2": "Leaderboard Access",
     "feature3": "Progress Tracking",
     "feature4": "Unlimited Attempts",
@@ -294,10 +294,10 @@
     "expiry": "Expiry",
     "cvc": "CVC",
     "scanQR": "Scan the QR code to pay",
-    "demoNote": "This is a demo â€” payment will be simulated",
+    "demoNote": "This is a demo — payment will be simulated",
     "payNow": "Pay Now",
     "processing": "Processing...",
-    "welcomePremium": "ðŸŽ‰ Welcome to Premium!",
+    "welcomePremium": "🎉 Welcome to Premium!",
     "successMessage": "Your premium access has been activated. Enjoy unlimited Japanese learning!",
     "startLearning": "Start Learning Japanese",
     "alreadyPremium": "You're Already Premium!",

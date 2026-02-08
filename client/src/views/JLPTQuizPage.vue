@@ -566,8 +566,8 @@ const isPremiumUser = computed(() => authStore.user?.is_premium || authStore.use
 const activeTab = ref('quiz')
 
 // JLPT Level Selection
-const selectedLevel = ref('N3')
-const similarLevel = ref('N3')
+const selectedLevel = ref('N5')
+const similarLevel = ref('N5')
 
 // Game State
 const gameState = ref('idle') // idle | playing | finished
@@ -602,7 +602,7 @@ const pointsEarned = ref(0)
 const totalPoints = ref(0)
 
 // ==========================================
-// JLPT N3 Kanji Data — Sound/Reading Quiz
+// JLPT Kanji Data — Sound/Reading Quiz (N5-N1)
 // ==========================================
 // ==========================================
 // KANJI DATA BY JLPT LEVEL
@@ -750,7 +750,7 @@ const kanjiByLevel = {
 }
 
 // Computed: get kanjiData based on selected level
-const kanjiData = computed(() => kanjiByLevel[selectedLevel.value] || kanjiByLevel.N3)
+const kanjiData = computed(() => kanjiByLevel[selectedLevel.value] || kanjiByLevel.N5)
 
 function shuffle(array) {
   const a = [...array]
@@ -1301,41 +1301,45 @@ async function finishGrammarGame() {
 
 .level-label {
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .level-buttons {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: inline-flex;
+  gap: 0;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid var(--border-light);
 }
 
 .level-btn {
-  padding: 0.5rem 1.2rem;
-  border-radius: 8px;
-  border: 2px solid var(--border-light);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  padding: 0.5rem 1.25rem;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
-.level-btn:hover {
-  border-color: #e74c3c;
-  background: rgba(231, 76, 60, 0.08);
+.level-btn:hover:not(.active) {
+  color: var(--text-primary);
+  background: rgba(212, 175, 55, 0.06);
 }
 
 .level-btn.active {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
   color: white;
-  border-color: #e74c3c;
-  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+  box-shadow: 0 2px 12px rgba(231, 76, 60, 0.35);
 }
 
 /* ===== Premium Gate ===== */
@@ -1354,6 +1358,7 @@ async function finishGrammarGame() {
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
   border-radius: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
 .premium-icon {
@@ -1401,46 +1406,75 @@ async function finishGrammarGame() {
 
 /* ===== Quiz Hero ===== */
 .quiz-hero {
-  padding: 3rem 2rem 2rem;
+  padding: 3.5rem 2rem 2.5rem;
   text-align: center;
   background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-  border-bottom: 1px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.quiz-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -10%;
+  width: 120%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(212, 175, 55, 0.04) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 60%, rgba(231, 76, 60, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.quiz-hero-content {
+  position: relative;
+  z-index: 1;
 }
 
 .quiz-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 1.25rem;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: rgba(212, 175, 55, 0.08);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 999px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: var(--color-primary);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .quiz-title {
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   font-weight: 800;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 
 .text-gold {
-  color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), #d4a853);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .quiz-subtitle {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--text-secondary);
-  max-width: 600px;
+  max-width: 540px;
   margin: 0 auto;
+  line-height: 1.7;
 }
 
 /* ===== Tabs ===== */
 .quiz-main {
   padding: 2rem;
-  max-width: 800px;
+  max-width: 820px;
   margin: 0 auto;
 }
 
@@ -1449,21 +1483,24 @@ async function finishGrammarGame() {
   border: 1px solid var(--border-light);
   border-radius: 1.25rem;
   overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
 }
 
 .tab-bar {
   display: flex;
-  border-bottom: 1px solid var(--border-light);
+  gap: 4px;
+  padding: 8px;
+  background: var(--bg-tertiary);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 0.875rem 0.5rem;
-  background: none;
+  padding: 0.75rem 0.5rem;
+  background: transparent;
   border: none;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-tertiary);
   cursor: pointer;
@@ -1471,21 +1508,21 @@ async function finishGrammarGame() {
   align-items: center;
   justify-content: center;
   gap: 0.375rem;
-  transition: all 0.2s;
-  border-bottom: 3px solid transparent;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
   white-space: nowrap;
   min-width: 0;
 }
 
 .tab-btn.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  background: rgba(212, 175, 55, 0.05);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
 }
 
 .tab-btn:hover:not(.active) {
   color: var(--text-primary);
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 /* ===== Start Screen ===== */
@@ -1497,62 +1534,64 @@ async function finishGrammarGame() {
 
 .start-card {
   text-align: center;
-  max-width: 420px;
+  max-width: 440px;
 }
 
 .start-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  font-size: 3.5rem;
+  margin-bottom: 1.25rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
 }
 
 .start-card h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.3px;
 }
 
 .start-card p {
   color: var(--text-secondary);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+  margin-bottom: 1.75rem;
+  line-height: 1.7;
+  font-size: 0.95rem;
 }
 
-/* NEW: Keyboard Hint */
+/* Keyboard Hint */
 .keyboard-hint {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  padding: 0.75rem 1rem;
-  background: rgba(212, 175, 55, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  margin-bottom: 1.75rem;
+  padding: 0.625rem 1.25rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
 }
 
 .hint-icon {
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
 kbd {
   display: inline-block;
-  padding: 0.2rem 0.5rem;
+  padding: 0.15rem 0.4rem;
   background: var(--bg-elevated);
   border: 1px solid var(--border-light);
-  border-radius: 0.25rem;
-  font-size: 0.8rem;
-  font-weight: 600;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: var(--text-primary);
-  font-family: monospace;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .quiz-rules {
   display: flex;
-  gap: 1.5rem;
+  gap: 0.75rem;
   justify-content: center;
   margin-bottom: 2rem;
 }
@@ -1561,24 +1600,35 @@ kbd {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.75rem 1.25rem;
+  gap: 0.375rem;
+  padding: 0.875rem 1.5rem;
   background: var(--bg-tertiary);
-  border-radius: 0.75rem;
+  border-radius: 12px;
   border: 1px solid var(--border-light);
+  min-width: 80px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.rule:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .rule-num {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 800;
-  color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), #d4a853);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .rule span:last-child {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.75px;
+  font-weight: 600;
 }
 
 .btn-start {
@@ -1591,14 +1641,19 @@ kbd {
   font-weight: 700;
   font-size: 1rem;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
 }
 
 .btn-start:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+}
+
+.btn-start:active {
+  transform: translateY(0);
 }
 
 .btn-secondary {
@@ -1611,23 +1666,26 @@ kbd {
   font-weight: 600;
   font-size: 1rem;
   border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-secondary:hover {
   background: var(--bg-elevated);
   border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 /* ===== Game Area ===== */
 .game-area {
   padding: 2rem;
+  position: relative;
 }
 
 .progress-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
 .progress-info {
@@ -1639,15 +1697,17 @@ kbd {
 .round-label {
   font-weight: 700;
   color: var(--text-primary);
+  font-size: 0.9rem;
 }
 
 .score-label {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-primary);
+  font-size: 0.9rem;
 }
 
 .progress-bar {
-  height: 6px;
+  height: 5px;
   background: var(--bg-tertiary);
   border-radius: 999px;
   overflow: hidden;
@@ -1658,11 +1718,11 @@ kbd {
   height: 100%;
   background: linear-gradient(90deg, var(--color-primary), #d4a853);
   border-radius: 999px;
-  transition: width 0.5s ease;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .timer-bar {
-  height: 4px;
+  height: 3px;
   background: var(--bg-tertiary);
   border-radius: 999px;
   overflow: hidden;
@@ -1682,24 +1742,51 @@ kbd {
 
 .timer-fill.danger {
   background: #ef4444;
+  animation: pulse-danger 0.5s ease infinite;
+}
+
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .timer-text {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-tertiary);
   text-align: right;
   display: block;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ===== Question Card ===== */
 .question-card {
   text-align: center;
-  padding: 2rem;
+  padding: 2.25rem 2rem;
   background: var(--bg-tertiary);
-  border: 2px solid var(--border-light);
-  border-radius: 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
   margin-bottom: 1.5rem;
   transition: transform 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.question-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), #d4a853, var(--color-primary));
+  background-size: 200% 100%;
+  animation: shimmer 3s ease infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .question-card.card-flip {
@@ -1707,33 +1794,35 @@ kbd {
 }
 
 .question-label {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   margin-bottom: 1rem;
 }
 
 .kanji-display {
-  font-size: 4rem;
+  font-size: 4.5rem;
   font-weight: 900;
   color: var(--text-primary);
   line-height: 1.2;
   font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', 'Yu Gothic', sans-serif;
+  letter-spacing: 2px;
 }
 
 .kanji-meaning {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-tertiary);
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  font-weight: 500;
 }
 
 /* ===== Answer Grid ===== */
 .answers-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 0.625rem;
   margin-bottom: 1rem;
 }
 
@@ -1742,38 +1831,41 @@ kbd {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 1.25rem;
-  background: var(--bg-tertiary);
-  border: 2px solid var(--border-light);
-  border-radius: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border-light);
+  border-radius: 12px;
   font-size: 1.1rem;
   color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
   font-family: 'Noto Sans JP', sans-serif;
 }
 
 .answer-btn:hover:not(.disabled) {
   border-color: var(--color-primary);
-  background: rgba(212, 175, 55, 0.08);
+  background: rgba(212, 175, 55, 0.06);
   transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .answer-btn.correct {
-  background: rgba(74, 222, 128, 0.15);
+  background: rgba(74, 222, 128, 0.12);
   border-color: #4ade80;
   color: #16a34a;
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.2);
 }
 
 .answer-btn.wrong {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.12);
   border-color: #ef4444;
   color: #dc2626;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
 }
 
 .answer-btn.disabled {
   cursor: default;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
 .answer-key {
@@ -1782,9 +1874,9 @@ kbd {
   height: 28px;
   align-items: center;
   justify-content: center;
-  background: var(--bg-elevated);
-  border-radius: 6px;
-  font-size: 0.8rem;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-tertiary);
   flex-shrink: 0;
@@ -1798,56 +1890,56 @@ kbd {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  background: var(--bg-primary);
+  width: 20px;
+  height: 20px;
+  background: var(--bg-tertiary);
   border: 1px solid var(--border-light);
   border-radius: 4px;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--text-tertiary);
   flex-shrink: 0;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
-/* ===== NEW: Combo Badge ===== */
+/* ===== Combo Badge ===== */
 .combo-badge {
   position: absolute;
-  top: 8rem;
-  right: 2rem;
+  top: 6rem;
+  right: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
   background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-  border-radius: 2rem;
-  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.35);
   color: white;
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   animation: pulse-combo 0.6s ease-in-out infinite;
   z-index: 10;
 }
 
 .combo-badge.mega-combo {
   background: linear-gradient(135deg, #f093fb, #f5576c);
-  transform: scale(1.1);
+  transform: scale(1.05);
   animation: pulse-mega 0.5s ease-in-out infinite;
 }
 
 .combo-icon {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   animation: flame 0.3s ease-in-out infinite;
 }
 
 @keyframes pulse-combo {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  50% { transform: scale(1.04); }
 }
 
 @keyframes pulse-mega {
-  0%, 100% { transform: scale(1.1); }
-  50% { transform: scale(1.15); }
+  0%, 100% { transform: scale(1.05); }
+  50% { transform: scale(1.1); }
 }
 
 @keyframes flame {
@@ -1870,33 +1962,31 @@ kbd {
   transform: translateY(-2rem) scale(0.8);
 }
 
-/* ===== NEW: Session Stats Widget ===== */
+/* ===== Session Stats Widget ===== */
 .session-stats-widget {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 0.75rem;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
 }
 
 .stat-mini {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: var(--bg-elevated);
-  border-radius: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  font-size: 0.8rem;
 }
 
 .stat-icon {
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 .stat-value {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -1907,34 +1997,37 @@ kbd {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem;
-  border-radius: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 12px;
   font-weight: 600;
   font-size: 0.95rem;
 }
 
 .feedback.correct {
-  background: rgba(74, 222, 128, 0.12);
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   color: #16a34a;
 }
 
 .feedback.wrong {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   color: #dc2626;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
 }
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+  transform: translateY(8px);
 }
 
 /* ===== Results ===== */
 .results-screen {
-  padding: 2rem;
+  padding: 2.5rem 2rem;
 }
 
 .results-card {
@@ -1942,15 +2035,17 @@ kbd {
 }
 
 .results-emoji {
-  font-size: 4rem;
-  margin-bottom: 0.5rem;
+  font-size: 3.5rem;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
 }
 
 .results-card h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.3px;
 }
 
 .final-score {
@@ -1964,7 +2059,10 @@ kbd {
 .score-number {
   font-size: 4rem;
   font-weight: 900;
-  color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), #d4a853);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: 1;
 }
 
@@ -1981,8 +2079,9 @@ kbd {
 
 .score-message {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   margin-bottom: 2rem;
+  line-height: 1.5;
 }
 
 .results-stats {
@@ -1996,7 +2095,7 @@ kbd {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.375rem;
 }
 
 .stat-val {
@@ -2014,10 +2113,11 @@ kbd {
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.75px;
+  font-weight: 600;
 }
 
 /* Points Earned Banner */
@@ -2025,44 +2125,50 @@ kbd {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  border: 2px solid #f59e0b;
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.8), rgba(253, 230, 138, 0.6));
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
   margin-bottom: 2rem;
 }
 
 .points-icon {
-  font-size: 2rem;
+  font-size: 1.75rem;
 }
 
 .points-info {
   display: flex;
   flex-direction: column;
   flex: 1;
+  gap: 0.125rem;
 }
 
 .points-amount {
-  font-size: 1.125rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #92400e;
 }
 
 .points-total {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #b45309;
+  font-weight: 500;
 }
 
 .points-shop-link {
   color: #92400e;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   text-decoration: none;
   white-space: nowrap;
+  padding: 0.375rem 0.75rem;
+  background: rgba(146, 64, 14, 0.08);
+  border-radius: 8px;
+  transition: background 0.2s;
 }
 
 .points-shop-link:hover {
-  text-decoration: underline;
+  background: rgba(146, 64, 14, 0.15);
 }
 
 .review-section {
@@ -2071,17 +2177,19 @@ kbd {
 }
 
 .review-section h3 {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.75rem;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .review-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .review-item {
@@ -2090,8 +2198,13 @@ kbd {
   gap: 1rem;
   padding: 0.75rem 1rem;
   background: var(--bg-tertiary);
-  border-radius: 0.75rem;
+  border-radius: 10px;
   border: 1px solid var(--border-light);
+  transition: transform 0.15s;
+}
+
+.review-item:hover {
+  transform: translateX(2px);
 }
 
 .review-kanji {
@@ -2108,7 +2221,7 @@ kbd {
   color: #ef4444;
   font-family: 'Noto Sans JP', sans-serif;
   text-decoration: line-through;
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
 .review-correct {
@@ -2119,14 +2232,15 @@ kbd {
 }
 
 .review-meaning {
-  font-size: 0.875rem;
+  font-size: 0.825rem;
   color: var(--text-tertiary);
   margin-left: auto;
+  font-weight: 500;
 }
 
 .results-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -2135,14 +2249,18 @@ kbd {
 .kanji-meaning-prompt {
   font-size: 1.75rem;
   font-weight: 800;
-  color: var(--color-primary);
-  margin-bottom: 0.25rem;
+  background: linear-gradient(135deg, var(--color-primary), #d4a853);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.375rem;
 }
 
 .kanji-reading-hint {
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   color: var(--text-secondary);
   font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 500;
 }
 
 .answer-btn-kanji .kanji-option {
@@ -2153,56 +2271,62 @@ kbd {
 
 /* ===== Sentence Grammar Quiz ===== */
 .grammar-english-hint {
-  font-size: 1.125rem;
+  font-size: 1.05rem;
   color: var(--text-secondary);
   margin-top: 0.5rem;
   font-style: italic;
+  font-weight: 500;
 }
 
 .grammar-answer-area {
-  margin: 1.5rem 0 1rem;
-  min-height: 64px;
+  margin: 1.25rem 0 0.75rem;
+  min-height: 60px;
   background: var(--bg-tertiary);
-  border: 2px dashed var(--border-light);
-  border-radius: 1rem;
-  padding: 1rem;
+  border: 2px dashed rgba(212, 175, 55, 0.2);
+  border-radius: 14px;
+  padding: 0.875rem;
   display: flex;
   align-items: center;
+  transition: border-color 0.2s;
+}
+
+.grammar-answer-area:focus-within {
+  border-color: rgba(212, 175, 55, 0.4);
 }
 
 .answer-slots {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.375rem;
   width: 100%;
-  min-height: 40px;
+  min-height: 36px;
   align-items: center;
 }
 
 .placeholder-text {
   color: var(--text-tertiary);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-style: italic;
 }
 
 .grammar-word-pool {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.375rem;
   justify-content: center;
-  margin-bottom: 1.5rem;
-  padding: 0 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0 0.75rem;
 }
 
 .word-chip {
   padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
-  font-size: 1.0625rem;
+  border-radius: 10px;
+  font-size: 1rem;
   font-weight: 600;
   font-family: 'Noto Sans JP', sans-serif;
   cursor: pointer;
-  transition: all 0.2s;
-  border: 2px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid transparent;
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -2217,28 +2341,28 @@ kbd {
 .word-chip.available:hover:not(:disabled) {
   border-color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
 }
 
 .word-chip.available:disabled {
-  opacity: 0.3;
+  opacity: 0.25;
   cursor: not-allowed;
   transform: none;
 }
 
 .word-chip.selected {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.08));
-  border-color: var(--color-primary);
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.3);
   color: var(--color-primary);
 }
 
 .word-chip.selected:hover {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.15));
+  background: rgba(212, 175, 55, 0.18);
 }
 
 .chip-remove {
-  font-size: 0.75rem;
-  opacity: 0.6;
+  font-size: 0.7rem;
+  opacity: 0.5;
   transition: opacity 0.2s;
 }
 
@@ -2248,9 +2372,9 @@ kbd {
 
 .grammar-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .grammar-feedback-detail {
@@ -2260,7 +2384,7 @@ kbd {
 }
 
 .correct-sentence {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-family: 'Noto Sans JP', sans-serif;
   font-weight: 600;
   color: #16a34a;
@@ -2284,19 +2408,20 @@ kbd {
 
 .leaderboard-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
 
 .leaderboard-header h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.375rem;
+  letter-spacing: -0.3px;
 }
 
 .leaderboard-header p {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
 }
 
 .leaderboard-loading {
@@ -2309,9 +2434,9 @@ kbd {
 }
 
 .loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border-light);
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid var(--border-light);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -2327,7 +2452,7 @@ kbd {
 }
 
 .empty-icon {
-  font-size: 3rem;
+  font-size: 2.5rem;
   display: block;
   margin-bottom: 1rem;
 }
@@ -2340,24 +2465,29 @@ kbd {
 .leaderboard-table {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .lb-row {
   display: grid;
-  grid-template-columns: 50px 1fr 80px 80px;
+  grid-template-columns: 48px 1fr 72px 80px;
   align-items: center;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
+  border-radius: 10px;
   gap: 0.5rem;
+  transition: transform 0.15s;
+}
+
+.lb-row:not(.lb-header-row):hover {
+  transform: translateX(2px);
 }
 
 .lb-header-row {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.75px;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-light);
 }
@@ -2368,33 +2498,34 @@ kbd {
 }
 
 .lb-top1 {
-  background: rgba(255, 215, 0, 0.08) !important;
-  border-color: rgba(255, 215, 0, 0.3) !important;
+  background: rgba(255, 215, 0, 0.06) !important;
+  border-color: rgba(255, 215, 0, 0.25) !important;
 }
 
 .lb-top2 {
-  background: rgba(192, 192, 192, 0.08) !important;
-  border-color: rgba(192, 192, 192, 0.3) !important;
+  background: rgba(192, 192, 192, 0.06) !important;
+  border-color: rgba(192, 192, 192, 0.25) !important;
 }
 
 .lb-top3 {
-  background: rgba(205, 127, 50, 0.08) !important;
-  border-color: rgba(205, 127, 50, 0.3) !important;
+  background: rgba(205, 127, 50, 0.06) !important;
+  border-color: rgba(205, 127, 50, 0.25) !important;
 }
 
 .lb-self {
   border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 1px var(--color-primary);
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.2);
 }
 
 .lb-rank {
   font-weight: 700;
   color: var(--text-primary);
   text-align: center;
+  font-size: 0.9rem;
 }
 
 .medal {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
 }
 
 .lb-name {
@@ -2406,16 +2537,17 @@ kbd {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.9rem;
 }
 
 .lb-avatar {
   display: inline-flex;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   background: linear-gradient(135deg, var(--color-primary), #d4a853);
   color: white;
   border-radius: 50%;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   align-items: center;
   justify-content: center;
@@ -2426,12 +2558,14 @@ kbd {
   font-weight: 700;
   color: var(--color-primary);
   text-align: center;
+  font-size: 0.9rem;
 }
 
 .lb-date {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-tertiary);
   text-align: right;
+  font-weight: 500;
 }
 
 .personal-best {
@@ -2440,43 +2574,61 @@ kbd {
   justify-content: center;
   gap: 0.75rem;
   margin-top: 1.5rem;
-  padding: 1rem;
-  background: rgba(212, 175, 55, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  border-radius: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  background: rgba(212, 175, 55, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 12px;
 }
 
 .pb-label {
   font-weight: 600;
   color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 .pb-score {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 800;
-  color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), #d4a853);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* ===== Responsive ===== */
 @media (max-width: 640px) {
+  .quiz-hero {
+    padding: 2.5rem 1.5rem 2rem;
+  }
+
   .quiz-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+  }
+
+  .quiz-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .quiz-main {
+    padding: 1rem;
   }
 
   .kanji-display {
-    font-size: 3rem;
+    font-size: 3.5rem;
   }
 
   .answers-grid {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
 
   .quiz-rules {
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 
   .rule {
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 1rem;
+    min-width: 70px;
   }
 
   .lb-row {
@@ -2501,13 +2653,17 @@ kbd {
 
   .tab-btn {
     padding: 0.625rem 0.375rem;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     gap: 0.25rem;
   }
 
   .tab-btn svg {
     width: 14px;
     height: 14px;
+  }
+
+  .game-area {
+    padding: 1.25rem;
   }
 
   .grammar-answer-area {
@@ -2522,14 +2678,44 @@ kbd {
   .answer-btn-kanji .kanji-option {
     font-size: 1.5rem;
   }
+
+  .level-buttons {
+    padding: 3px;
+  }
+
+  .level-btn {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8rem;
+  }
+
+  .start-screen {
+    padding: 2rem 1.5rem;
+  }
+
+  .combo-badge {
+    top: 4.5rem;
+    right: 0.75rem;
+    font-size: 0.8rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .session-stats-widget {
+    gap: 0.375rem;
+  }
+
+  .stat-mini {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
 }
 
 .quiz-footer {
   text-align: center;
   padding: 2rem;
   color: var(--text-tertiary);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   border-top: 1px solid var(--border-light);
   margin-top: 2rem;
+  letter-spacing: 0.25px;
 }
 </style>
