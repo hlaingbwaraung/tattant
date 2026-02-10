@@ -34,6 +34,8 @@ jobs:
 
       - name: Build
         run: cd client && npm run build
+        env:
+          VITE_API_URL: https://suteki-api.onrender.com/api
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
