@@ -32,7 +32,7 @@ exports.search = async (req, res) => {
     const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS)
 
     const response = await fetch(url, {
-      headers: { 'User-Agent': 'SutekiDictionaryProxy/1.0 (+https://github.com/hlaingbwaraung)' },
+      headers: { 'User-Agent': 'TattantDictionaryProxy/1.0 (+https://github.com/hlaingbwaraung)' },
       signal: controller.signal
     })
 

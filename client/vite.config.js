@@ -1,19 +1,19 @@
 /**
  * Vite Configuration
  *
- * - Uses the Vue plugin for SFC compilation
- * - Sets base path to /suteki/ for GitHub Pages deployment
+ * - Uses the React plugin for JSX compilation
+ * - Sets base path to /tattant/ for GitHub Pages deployment
  * - Proxies /api requests to the Express backend during local dev
  */
 
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [react()],
 
   // Sub-directory base for GitHub Pages
-  base: '/suteki/',
+  base: '/tattant/',
 
   server: {
     proxy: {

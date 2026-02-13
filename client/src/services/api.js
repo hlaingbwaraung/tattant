@@ -32,7 +32,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
-      window.location.href = '/suteki/login'
+      window.location.href = '/tattant/login'
     }
     return Promise.reject(error)
   }

@@ -1,17 +1,21 @@
 /**
  * Auth controller  –  handles user registration, login, Google OAuth,
- * profile management, password changes, and premium activation.
+ * profile management, password changes, premium activation,
+ * and forgot-password / OTP-based password reset.
  *
  * Exports: register, login, googleAuth, getCurrentUser,
- *          updateProfile, updatePassword, deleteAccount, activatePremium
+ *          updateProfile, updatePassword, deleteAccount, activatePremium,
+ *          forgotPassword, verifyOtp, resetPassword
  */
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { OAuth2Client } = require('google-auth-library')
 const { User } = require('../models')
+const { sendOtpEmail } = require('../services/emailService')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production'
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d'
+const OTP_EXPIRY_MINUTES = 10
 
 // Register new user
 exports.register = async (req, res) => {
@@ -356,5 +360,136 @@ exports.activatePremium = async (req, res) => {
   } catch (error) {
     console.error('Activate premium error:', error)
     res.status(500).json({ message: 'Server error activating premium' })
+  }
+}
+
+// ============================================================
+// FORGOT PASSWORD / OTP FLOW
+// ============================================================
+
+// Step 1: Send OTP to email
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' })
+    }
+
+    // Always return success (don't reveal if user exists)
+    const user = await User.findOne({ where: { email } })
+    if (!user) {
+      return res.json({ message: 'If an account with that email exists, an OTP has been sent.' })
+    }
+
+    // Generate 6-digit OTP
+    const otp = String(Math.floor(100000 + Math.random() * 900000))
+
+    // Hash OTP before storing
+    const hashedOtp = await bcrypt.hash(otp, 10)
+    user.otp_code = hashedOtp
+    user.otp_expires_at = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000)
+    await user.save()
+
+    // Send email
+    try {
+      await sendOtpEmail(email, otp, user.name || 'User')
+    } catch (emailErr) {
+      console.error('Failed to send OTP email:', emailErr)
+      return res.status(500).json({ message: 'Failed to send OTP email. Please try again later.' })
+    }
+
+    res.json({ message: 'If an account with that email exists, an OTP has been sent.' })
+  } catch (error) {
+    console.error('Forgot password error:', error)
+    res.status(500).json({ message: 'Server error processing request' })
+  }
+}
+
+// Step 2: Verify OTP and return a short-lived reset token
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: 'Email and OTP are required' })
+    }
+
+    const user = await User.findOne({ where: { email } })
+    if (!user || !user.otp_code) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' })
+    }
+
+    // Check expiry
+    if (new Date() > new Date(user.otp_expires_at)) {
+      user.otp_code = null
+      user.otp_expires_at = null
+      await user.save()
+      return res.status(400).json({ message: 'OTP has expired. Please request a new one.' })
+    }
+
+    // Compare OTP
+    const isMatch = await bcrypt.compare(otp, user.otp_code)
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid OTP code' })
+    }
+
+    // Clear OTP (single use)
+    user.otp_code = null
+    user.otp_expires_at = null
+    await user.save()
+
+    // Issue short-lived reset token (15 min)
+    const resetToken = jwt.sign(
+      { id: user.id, email: user.email, purpose: 'password-reset' },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    )
+
+    res.json({ message: 'OTP verified', resetToken })
+  } catch (error) {
+    console.error('Verify OTP error:', error)
+    res.status(500).json({ message: 'Server error verifying OTP' })
+  }
+}
+
+// Step 3: Reset password with the reset token
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: 'Token and new password are required' })
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' })
+    }
+
+    // Verify reset token
+    let decoded
+    try {
+      decoded = jwt.verify(token, JWT_SECRET)
+    } catch (jwtErr) {
+      return res.status(400).json({ message: 'Invalid or expired reset token. Please start the process again.' })
+    }
+
+    if (decoded.purpose !== 'password-reset') {
+      return res.status(400).json({ message: 'Invalid token' })
+    }
+
+    const user = await User.findByPk(decoded.id)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    // Hash and save new password
+    user.password_hash = await bcrypt.hash(newPassword, 10)
+    await user.save()
+
+    res.json({ message: 'Password reset successfully. You can now log in with your new password.' })
+  } catch (error) {
+    console.error('Reset password error:', error)
+    res.status(500).json({ message: 'Server error resetting password' })
   }
 }

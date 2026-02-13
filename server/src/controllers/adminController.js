@@ -7,6 +7,7 @@
  * Every handler checks `req.user.is_admin` before proceeding.
  */
 const { User } = require('../models')
+const bcrypt = require('bcryptjs')
 
 // Get all users (admin only)
 exports.getAllUsers = async (req, res) => {
@@ -70,7 +71,7 @@ exports.getUserStats = async (req, res) => {
   }
 }
 
-// Update user admin status (admin only)
+// Update user admin status (admin only, requires admin password confirmation)
 exports.toggleAdminStatus = async (req, res) => {
   try {
     // Check if user is admin
@@ -79,7 +80,19 @@ exports.toggleAdminStatus = async (req, res) => {
     }
 
     const { userId } = req.params
-    const { is_admin } = req.body
+    const { is_admin, admin_password } = req.body
+
+    // Require admin password confirmation
+    if (!admin_password) {
+      return res.status(400).json({ message: 'Admin password is required to change admin status' })
+    }
+
+    // Verify the requesting admin's password
+    const adminUser = await User.findByPk(req.user.id)
+    const isPasswordValid = await bcrypt.compare(admin_password, adminUser.password_hash)
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Incorrect admin password' })
+    }
 
     // Prevent user from removing their own admin status
     if (userId === req.user.id && !is_admin) {
@@ -183,5 +196,38 @@ exports.togglePremiumStatus = async (req, res) => {
   } catch (error) {
     console.error('Toggle premium status error:', error)
     res.status(500).json({ message: 'Server error while updating premium status' })
+  }
+}
+
+// Reset user password (admin only)
+exports.resetUserPassword = async (req, res) => {
+  try {
+    if (!req.user.is_admin) {
+      return res.status(403).json({ message: 'Access denied. Admin only.' })
+    }
+
+    const { userId } = req.params
+    const { new_password } = req.body
+
+    if (!new_password || new_password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' })
+    }
+
+    const user = await User.findByPk(userId)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    user.password_hash = await bcrypt.hash(new_password, salt)
+    await user.save()
+
+    res.json({
+      message: `Password reset successfully for ${user.email}`,
+      user: { id: user.id, email: user.email }
+    })
+  } catch (error) {
+    console.error('Reset user password error:', error)
+    res.status(500).json({ message: 'Server error while resetting password' })
   }
 }

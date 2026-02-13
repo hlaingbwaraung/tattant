@@ -22,6 +22,9 @@ const { authenticate } = require('../middleware/auth')
 router.post('/register', authController.register)
 router.post('/login', authController.login)
 router.post('/google', authController.googleAuth)
+router.post('/forgot-password', authController.forgotPassword)
+router.post('/verify-otp', authController.verifyOtp)
+router.post('/reset-password', authController.resetPassword)
 
 // Protected routes
 router.get('/me', authenticate, authController.getCurrentUser)

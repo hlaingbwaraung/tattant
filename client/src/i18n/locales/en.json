@@ -34,7 +34,7 @@
     "statsCategories": "Categories",
     "statsLanguages": "Languages",
     "statsRating": "Rating",
-    "featuredTitle": "Why Choose Suteki",
+    "featuredTitle": "Why Choose Tattant",
     "featuredSubtitle": "We make your Japan journey effortless",
     "featureCurated": "Curated Selection",
     "featureCuratedDesc": "Hand-picked businesses and services vetted for quality and authenticity",
@@ -43,7 +43,7 @@
     "featurePremium": "Premium Experience",
     "featurePremiumDesc": "Luxury recommendations tailored to discerning travelers",
     "ctaTitle": "Ready to Explore Japan?",
-    "ctaSubtitle": "Join thousands of travelers who trust Suteki for their Japan adventures",
+    "ctaSubtitle": "Join thousands of travelers who trust Tattant for their Japan adventures",
     "ctaButton": "Start Free Today",
     "categories": "Browse by Category",
     "featured": "Featured Businesses"
@@ -58,7 +58,7 @@
     "saveFavorites": "Save your favorite places",
     "personalizedRecs": "Personalized recommendations",
     "exclusiveContent": "Exclusive member content",
-    "joinTitle": "Join Suteki",
+    "joinTitle": "Join Tattant",
     "joinSubtitle": "Create your account and start exploring Japan like never before",
     "createAccount": "Create Account",
     "creatingAccount": "Creating account...",
@@ -170,7 +170,7 @@
     "practical": "Practical",
     "loadingBlogs": "Loading blogs...",
     "noBlogs": "No blogs available yet. Check back soon!",
-    "footerText": "© 2026 Suteki. Your Premium Japan Guide."
+    "footerText": "© 2026 Tattant. Your Premium Japan Guide."
   },
   "filters": {
     "search": "Search",
@@ -222,7 +222,7 @@
     "contact": "Contact",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "copyright": "© 2026 Suteki. All rights reserved."
+    "copyright": "© 2026 Tattant. All rights reserved."
   },
   "jlpt": {
     "badge": "JLPT Quiz",

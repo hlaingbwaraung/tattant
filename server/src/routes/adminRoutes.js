@@ -5,6 +5,7 @@
  *   GET    /stats                    – User statistics
  *   PATCH  /users/:userId/admin      – Toggle admin flag
  *   PATCH  /users/:userId/premium    – Toggle premium flag
+ *   PATCH  /users/:userId/password   – Reset user password
  *   DELETE /users/:userId            – Delete user
  */
 const express = require('express')
@@ -26,6 +27,9 @@ router.patch('/users/:userId/admin', adminController.toggleAdminStatus)
 
 // Toggle user premium status
 router.patch('/users/:userId/premium', adminController.togglePremiumStatus)
+
+// Reset user password
+router.patch('/users/:userId/password', adminController.resetUserPassword)
 
 // Delete user
 router.delete('/users/:userId', adminController.deleteUser)

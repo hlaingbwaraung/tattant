@@ -1,5 +1,5 @@
 /**
- * vue-i18n configuration
+ * i18n Configuration (react-i18next)
  *
  * Supported locales:
  *   - en  (English)  – default
@@ -7,18 +7,20 @@
  *
  * The active locale is persisted to localStorage as 'locale'.
  */
-import { createI18n } from 'vue-i18n'
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
 import en from './locales/en.json'
 import my from './locales/my.json'
 
-const i18n = createI18n({
-  legacy: false,
-  globalInjection: true,
-  locale: localStorage.getItem('locale') || 'en',
-  fallbackLocale: 'en',
-  messages: {
-    en,
-    my
+i18n.use(initReactI18next).init({
+  resources: {
+    en: { translation: en },
+    my: { translation: my }
+  },
+  lng: localStorage.getItem('locale') || 'en',
+  fallbackLng: 'en',
+  interpolation: {
+    escapeValue: false // React already escapes
   }
 })
 

@@ -9,7 +9,7 @@ module.exports = {
     const users = [
       {
         id: uuidv4(),
-        email: 'admin@suteki.com',
+        email: 'admin@tattant.com',
         password_hash: hashedPassword,
         google_id: null,
         name: 'Admin User',
@@ -39,7 +39,7 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('users', {
       email: {
-        [Sequelize.Op.in]: ['admin@suteki.com', 'test@example.com']
+        [Sequelize.Op.in]: ['admin@tattant.com', 'test@example.com']
       }
     }, {})
   }

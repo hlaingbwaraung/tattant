@@ -8,9 +8,9 @@ module.exports = {
       allowNull: false
     })
 
-    // Make the existing admin@suteki.com user an admin
+    // Make the existing admin@tattant.com user an admin
     await queryInterface.sequelize.query(
-      "UPDATE users SET is_admin = true WHERE email = 'admin@suteki.com'"
+      "UPDATE users SET is_admin = true WHERE email = 'admin@tattant.com'"
     )
   },
 

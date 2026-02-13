@@ -95,6 +95,14 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 0,
     allowNull: false
+  },
+  otp_code: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  otp_expires_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'users',

@@ -5,15 +5,15 @@
  * registers all API route modules, and starts the HTTP server.
  */
 
-const express    = require('express')
-const cors       = require('cors')
-const helmet     = require('helmet')
-const rateLimit  = require('express-rate-limit')
+const express = require('express')
+const cors = require('cors')
+const helmet = require('helmet')
+const rateLimit = require('express-rate-limit')
 require('dotenv').config()
 
 const { testConnection } = require('./config/database')
 
-const app  = express()
+const app = express()
 const PORT = process.env.PORT || 5000
 
 /* ========================================
@@ -30,6 +30,9 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://127.0.0.1:5175',
   'https://hlaingbwaraung.github.io',
   process.env.FRONTEND_URL
 ].filter(Boolean)
@@ -55,7 +58,7 @@ const authLimiter = rateLimit({
 })
 
 app.use('/api/', apiLimiter)
-app.use('/api/auth/login',    authLimiter)
+app.use('/api/auth/login', authLimiter)
 app.use('/api/auth/register', authLimiter)
 
 /* ========================================
@@ -68,16 +71,16 @@ app.get('/health', (_req, res) => {
 /* ========================================
  *  5. API Routes
  * ======================================== */
-app.use('/api/auth',       require('./routes/authRoutes'))
+app.use('/api/auth', require('./routes/authRoutes'))
 app.use('/api/categories', require('./routes/categoryRoutes'))
 app.use('/api/businesses', require('./routes/businessRoutes'))
-app.use('/api/favorites',  require('./routes/favoriteRoutes'))
-app.use('/api/admin',      require('./routes/adminRoutes'))
-app.use('/api/blogs',      require('./routes/blogRoutes'))
-app.use('/api/coupons',    require('./routes/couponRoutes'))
+app.use('/api/favorites', require('./routes/favoriteRoutes'))
+app.use('/api/admin', require('./routes/adminRoutes'))
+app.use('/api/blogs', require('./routes/blogRoutes'))
+app.use('/api/coupons', require('./routes/couponRoutes'))
 app.use('/api/shop-owner', require('./routes/shopOwnerRoutes'))
-app.use('/api/quiz',       require('./routes/quizRoutes'))
-app.use('/api/points',     require('./routes/pointsRoutes'))
+app.use('/api/quiz', require('./routes/quizRoutes'))
+app.use('/api/points', require('./routes/pointsRoutes'))
 app.use('/api/dictionary', require('./routes/dictionaryRoutes'))
 
 /* ========================================

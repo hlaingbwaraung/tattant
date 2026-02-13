@@ -73,7 +73,7 @@ export default function AdminDashboard() {
     const [shopFormModal, setShopFormModal] = useState({ show: false, shop: null })
     const [shopSaving, setShopSaving] = useState(false)
     const [shopForm, setShopForm] = useState({ ...emptyShopForm })
-    const [shopPhotosText, setShopPhotosText] = useState('')
+    const [shopPhotos, setShopPhotos] = useState([])
     const [shopTagsText, setShopTagsText] = useState('')
     const [shopLangsText, setShopLangsText] = useState('')
 
@@ -206,14 +206,34 @@ export default function AdminDashboard() {
     const openShopForm = (shop) => {
         if (shop) {
             setShopForm({ name: shop.name, category_id: shop.category_id || '', description_en: shop.description_en || '', description_my: shop.description_my || '', address: shop.address || '', latitude: shop.latitude || '', longitude: shop.longitude || '', phone: shop.phone || '', website: shop.website || '', price_range: shop.price_range || '', is_active: shop.is_active !== false })
-            setShopPhotosText((shop.photos || []).join('\n'))
+            setShopPhotos(shop.photos || [])
             setShopTagsText((shop.tags || []).join(', '))
             setShopLangsText((shop.languages_supported || []).join(', '))
         } else {
-            setShopForm({ ...emptyShopForm }); setShopPhotosText(''); setShopTagsText(''); setShopLangsText('')
+            setShopForm({ ...emptyShopForm }); setShopPhotos([]); setShopTagsText(''); setShopLangsText('')
         }
         setShopFormModal({ show: true, shop })
     }
+
+    const handleShopPhotoUpload = async (e) => {
+        const files = Array.from(e.target.files || [])
+        if (!files.length) return
+
+        const imageFiles = files.filter(file => file.type.startsWith('image/'))
+        const encodedPhotos = await Promise.all(imageFiles.map(file => new Promise((resolve) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result)
+            reader.readAsDataURL(file)
+        })))
+
+        setShopPhotos(prev => [...prev, ...encodedPhotos])
+        e.target.value = ''
+    }
+
+    const removeShopPhoto = (index) => {
+        setShopPhotos(prev => prev.filter((_, i) => i !== index))
+    }
+
     const saveShop = async (e) => {
         e.preventDefault(); setShopSaving(true)
         try {
@@ -243,7 +263,7 @@ export default function AdminDashboard() {
             const data = {
                 ...shopForm,
                 category_id: categoryId,
-                photos: shopPhotosText.split('\n').map(s => s.trim()).filter(Boolean),
+                photos: shopPhotos,
                 tags: shopTagsText.split(',').map(s => s.trim()).filter(Boolean),
                 languages_supported: shopLangsText.split(',').map(s => s.trim()).filter(Boolean)
             }
@@ -473,7 +493,20 @@ export default function AdminDashboard() {
                     <div className="form-row"><div className="form-group flex-1"><label>Address</label><input value={shopForm.address} onChange={sf('address')} type="text" /></div><div className="form-group" style={{ width: 150 }}><label>Price</label><select value={shopForm.price_range} onChange={sf('price_range')}><option value="">None</option><option value="¥">¥</option><option value="¥¥">¥¥</option><option value="¥¥¥">¥¥¥</option><option value="¥¥¥¥">¥¥¥¥</option></select></div></div>
                     <div className="form-row"><div className="form-group"><label>Phone</label><input value={shopForm.phone} onChange={sf('phone')} type="text" /></div><div className="form-group"><label>Website</label><input value={shopForm.website} onChange={sf('website')} type="text" /></div></div>
                     <div className="form-row"><div className="form-group"><label>Latitude</label><input value={shopForm.latitude} onChange={sf('latitude')} type="text" /></div><div className="form-group"><label>Longitude</label><input value={shopForm.longitude} onChange={sf('longitude')} type="text" /></div></div>
-                    <div className="form-group"><label>Photo URLs (one per line)</label><textarea value={shopPhotosText} onChange={e => setShopPhotosText(e.target.value)} rows="3" /></div>
+                    <div className="form-group">
+                        <label>Upload Photos</label>
+                        <input type="file" accept="image/*" multiple onChange={handleShopPhotoUpload} />
+                        {shopPhotos.length > 0 && (
+                            <div className="photo-preview" style={{ marginTop: 10 }}>
+                                {shopPhotos.map((photo, index) => (
+                                    <div key={`${photo.slice(0, 24)}-${index}`} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', marginRight: 10, marginBottom: 10 }}>
+                                        <img src={photo} alt={`Shop photo ${index + 1}`} style={{ width: 96, height: 72, objectFit: 'cover', borderRadius: 8 }} />
+                                        <button type="button" className="btn-delete" style={{ marginTop: 6, padding: '4px 8px' }} onClick={() => removeShopPhoto(index)}>Remove</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     <div className="form-group"><label>Tags (comma-separated)</label><input value={shopTagsText} onChange={e => setShopTagsText(e.target.value)} type="text" /></div>
                     <div className="form-group"><label>Languages (comma-separated)</label><input value={shopLangsText} onChange={e => setShopLangsText(e.target.value)} type="text" /></div>
                     <div className="form-group checkbox-group"><label><input type="checkbox" checked={shopForm.is_active} onChange={sf('is_active')} /> Active</label></div>
