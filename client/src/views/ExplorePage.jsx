@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import axios from 'axios'
+import api from '../services/api'
 import AppHeader from '../components/layout/AppHeader'
 import './ExplorePage.css'
 
@@ -19,10 +19,10 @@ export default function ExplorePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const catRes = await axios.get('http://localhost:5000/api/categories')
+                const catRes = await api.get('/categories')
                 const cats = catRes.data.categories || catRes.data || []
 
-                const bizRes = await axios.get('http://localhost:5000/api/businesses')
+                const bizRes = await api.get('/businesses')
                 const allBusinesses = bizRes.data.businesses || bizRes.data || []
 
                 const countMap = {}

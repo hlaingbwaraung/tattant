@@ -16,6 +16,9 @@ const { testConnection } = require('./config/database')
 const app = express()
 const PORT = process.env.PORT || 5000
 
+// Trust nginx reverse proxy (required for express-rate-limit behind proxy)
+app.set('trust proxy', 1)
+
 /* ========================================
  *  1. Security & Parsing Middleware
  * ======================================== */

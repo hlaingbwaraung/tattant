@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import axios from 'axios'
+import api from '../services/api'
 import AppHeader from '../components/layout/AppHeader'
 import { saveBusiness, unsaveBusiness, checkIfSaved } from '../services/favoriteService'
 import useAuthStore from '../store/useAuthStore'
@@ -27,7 +27,7 @@ export default function BusinessDetailPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/businesses/${id}`)
+                const response = await api.get(`/businesses/${id}`)
                 setBusiness(response.data)
                 if (isAuthenticated) {
                     try {

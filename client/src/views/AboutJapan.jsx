@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
-import axios from 'axios'
+import api from '../services/api'
 import AppHeader from '../components/layout/AppHeader'
 import './AboutJapan.css'
 
@@ -44,7 +44,7 @@ export default function AboutJapan() {
         const loadBlogs = async () => {
             try {
                 setLoading(true)
-                const response = await axios.get('http://localhost:5000/api/blogs', { params: { published: true } })
+                const response = await api.get('/blogs', { params: { published: true } })
                 setArticles(response.data.data.map(blog => ({
                     id: blog.id, title: blog.title, title_my: blog.title_my, emoji: blog.emoji,
                     category: blog.category, tag: blog.tag,

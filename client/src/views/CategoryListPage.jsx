@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import axios from 'axios'
+import api from '../services/api'
 import AppHeader from '../components/layout/AppHeader'
 import './CategoryListPage.css'
 
@@ -33,7 +33,7 @@ export default function CategoryListPage() {
             setLoading(true)
             setError('')
             try {
-                const response = await axios.get(`http://localhost:5000/api/businesses?category=${slug}`)
+                const response = await api.get(`/businesses?category=${slug}`)
                 setBusinesses(response.data.businesses || response.data)
             } catch (err) {
                 setError('Failed to load businesses. Please try again later.')

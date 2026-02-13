@@ -3,7 +3,7 @@
  */
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../services/api'
 import AppHeader from '../components/layout/AppHeader'
 import useAuthStore from '../store/useAuthStore'
 import './ProfileSettings.css'
@@ -37,7 +37,7 @@ export default function ProfileSettings() {
         setIsUpdatingProfile(true)
         try {
             const token = localStorage.getItem('token')
-            const response = await axios.put('http://localhost:5000/api/auth/profile',
+            const response = await api.put('/auth/profile',
                 { name: profileForm.name, email: profileForm.email },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
@@ -64,7 +64,7 @@ export default function ProfileSettings() {
         setIsUpdatingPassword(true)
         try {
             const token = localStorage.getItem('token')
-            await axios.put('http://localhost:5000/api/auth/password',
+            await api.put('/auth/password',
                 { currentPassword: passwordForm.currentPassword, newPassword: passwordForm.newPassword },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
@@ -84,7 +84,7 @@ export default function ProfileSettings() {
     const deleteAccount = async () => {
         try {
             const token = localStorage.getItem('token')
-            await axios.delete('http://localhost:5000/api/auth/account', { headers: { Authorization: `Bearer ${token}` } })
+            await api.delete('/auth/account')
             logout()
             navigate('/')
         } catch (err) { alert(err.response?.data?.message || 'Failed to delete account') }
