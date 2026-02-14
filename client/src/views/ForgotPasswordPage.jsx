@@ -152,7 +152,7 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <div className="auth-page">
+        <div className="auth-page forgot-luxury">
             <div className="auth-container">
                 {/* Left Side - Branding */}
                 <div className="auth-branding">

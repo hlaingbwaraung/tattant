@@ -22,7 +22,10 @@ app.set('trust proxy', 1)
 /* ========================================
  *  1. Security & Parsing Middleware
  * ======================================== */
-app.use(helmet())                                 // HTTP security headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }
+}))                                               // HTTP security headers
 app.use(express.json())                           // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true }))   // Parse URL-encoded bodies
 
@@ -37,6 +40,8 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175',
   'https://hlaingbwaraung.github.io',
+  'https://tattant.com',
+  'https://www.tattant.com',
   process.env.FRONTEND_URL
 ].filter(Boolean)
 
@@ -56,7 +61,7 @@ const apiLimiter = rateLimit({
 // Stricter limiter for login / register (5 in prod, 100 in dev)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'development' ? 100 : 5,
+  max: process.env.NODE_ENV === 'development' ? 100 : 20,
   message: 'Too many authentication attempts, please try again later.'
 })
 

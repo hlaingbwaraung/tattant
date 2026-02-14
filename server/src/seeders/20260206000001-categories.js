@@ -7,7 +7,7 @@ module.exports = {
       {
         id: uuidv4(),
         name_en: 'Telecom & SIM Cards',
-        name_my: 'ဆက်သွယ်ရေးနှင့် SIM ကတ်များ',
+        name_my: 'SIM ကတ်နှင့် အင်တာနက်',
         icon: '📶',
         slug: 'sim-cards',
         display_order: 1,
@@ -17,7 +17,7 @@ module.exports = {
       {
         id: uuidv4(),
         name_en: 'Ramen Restaurants',
-        name_my: 'ရာမင် စားသောက်ဆိုင်များ',
+        name_my: 'ရာမင်ဆိုင်များ',
         icon: '🍜',
         slug: 'ramen',
         display_order: 2,
@@ -27,7 +27,7 @@ module.exports = {
       {
         id: uuidv4(),
         name_en: 'Sushi Restaurants',
-        name_my: 'ဆူရှီ စားသောက်ဆိုင်များ',
+        name_my: 'ဆူရှီဆိုင်များ',
         icon: '🍣',
         slug: 'sushi',
         display_order: 3,
@@ -37,7 +37,7 @@ module.exports = {
       {
         id: uuidv4(),
         name_en: 'Yakiniku & BBQ',
-        name_my: 'ယာကိနိကု နှင့် ဘာဘီကျူး',
+        name_my: 'ယာကိနိကု (အသားကင်)',
         icon: '🥩',
         slug: 'yakiniku',
         display_order: 4,

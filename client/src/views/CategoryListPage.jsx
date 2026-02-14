@@ -102,7 +102,7 @@ export default function CategoryListPage() {
                                         <div className="card-content">
                                             <h3 className="business-name">{business.name}</h3>
                                             <p className="business-description">{currentLocale === 'my' ? (business.description_my || business.description_en) : business.description_en}</p>
-                                            <div className="business-meta"><span className="address">📍 {business.address}</span></div>
+                                            <div className="business-meta"><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`} target="_blank" rel="noreferrer" className="address" onClick={e => e.stopPropagation()} style={{display:'inline-flex',alignItems:'center',gap:'4px',color:'#666',textDecoration:'none',cursor:'pointer',fontSize:'0.9rem',transition:'color 0.2s'}} onMouseEnter={e => e.currentTarget.style.color='#333'} onMouseLeave={e => e.currentTarget.style.color='#666'}><span style={{opacity:0.7}}>📍</span><span>{business.address}</span></a></div>
                                             <div className="business-tags">
                                                 {business.tags?.slice(0, 3).map(tag => <span key={tag} className="tag">{tag}</span>)}
                                             </div>

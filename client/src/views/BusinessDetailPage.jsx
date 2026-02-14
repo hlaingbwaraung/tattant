@@ -108,11 +108,11 @@ export default function BusinessDetailPage() {
                                         </div>
                                     </div>
                                 )}
-                                <div className="section"><h2>{t('business.location')}</h2><p className="address">📍 {business.address}</p></div>
+                                <div className="section"><h2>{t('business.location')}</h2><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`} target="_blank" rel="noreferrer" className="address-link" style={{display:'inline-flex',alignItems:'center',gap:'4px',color:'#555',textDecoration:'none',cursor:'pointer',fontSize:'0.95rem',padding:'6px 10px',backgroundColor:'#f8f9fa',borderRadius:'6px',transition:'all 0.2s'}} onMouseEnter={e => {e.currentTarget.style.backgroundColor='#e9ecef'; e.currentTarget.style.color='#333'}} onMouseLeave={e => {e.currentTarget.style.backgroundColor='#f8f9fa'; e.currentTarget.style.color='#555'}}><span style={{opacity:0.7}}>📍</span><span>{business.address}</span></a></div>
                                 {business.phone && (
                                     <div className="section">
                                         <h2>{t('business.contact')}</h2>
-                                        <p className="phone">📞 {business.phone}</p>
+                                        <a href={`tel:${business.phone}`} className="phone" style={{display:'inline-flex',alignItems:'center',gap:'4px',color:'#555',textDecoration:'none',cursor:'pointer',fontSize:'0.95rem',padding:'6px 10px',backgroundColor:'#f8f9fa',borderRadius:'6px',transition:'all 0.2s',marginBottom:'8px'}} onMouseEnter={e => {e.currentTarget.style.backgroundColor='#e9ecef'; e.currentTarget.style.color='#333'}} onMouseLeave={e => {e.currentTarget.style.backgroundColor='#f8f9fa'; e.currentTarget.style.color='#555'}}><span style={{opacity:0.7}}>📞</span><span>{business.phone.replace(/^\+81-?/, '0')}</span></a>
                                         {business.website && <p><a href={business.website} target="_blank" rel="noreferrer" className="website-link">🌐 {t('business.visitWebsite')} →</a></p>}
                                     </div>
                                 )}
