@@ -1,6 +1,6 @@
 /**
  * AppHeader – Global navigation bar shared by all pages.
- *   - Logo + main nav links (Home, Explore, About, Learn Japanese, Points Shop)
+ *   - Logo + main nav links (Home, SHOPS, About, Learn Japanese, Points Shop)
  *   - Language toggle (EN / MY)
  *   - Dark / light theme toggle
  *   - Auth area: login/register buttons or user dropdown menu
@@ -88,30 +88,94 @@ export default function AppHeader() {
                 </Link>
 
                 <nav className={`nav ${mobileMenuOpen ? 'open' : ''}`}>
-                    <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.home')}</Link>
-                    <Link to="/explore" className={`nav-link ${isActive('/explore') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.explore')}</Link>
-                    <Link to="/about-japan" className={`nav-link ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.about')}</Link>
-                    <Link to="/learn-japanese" className={`nav-link premium-link ${isActive('/learn-japanese') ? 'active' : ''}`} onClick={closeMobile}>🎌 {t('nav.learnJapanese')}</Link>
-                    <Link to="/points-shop" className={`nav-link ${isActive('/points-shop') ? 'active' : ''}`} onClick={closeMobile}>🪙 {t('nav.pointsShop')}</Link>
+                    {/* Desktop nav links (no icons) */}
+                    <Link to="/" className={`nav-link desktop-nav ${isActive('/') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.home')}</Link>
+                    <Link to="/explore" className={`nav-link desktop-nav ${isActive('/explore') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.explore')}</Link>
+                    <Link to="/about-japan" className={`nav-link desktop-nav ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.about')}</Link>
 
-                    {/* Mobile-only auth links */}
+                    {/* Mobile drawer content */}
                     {mobileMenuOpen && (
-                        <div className="mobile-auth">
-                            {!isAuthenticated ? (
-                                <>
-                                    <Link to="/login" className="nav-link" onClick={closeMobile}>{t('nav.login')}</Link>
-                                    <Link to="/register" className="nav-link mobile-signup" onClick={closeMobile}>{t('nav.getStarted')}</Link>
-                                </>
-                            ) : (
-                                <>
-                                    {user?.is_admin && <Link to="/admin" className="nav-link" onClick={closeMobile}>{t('nav.adminDashboard')}</Link>}
-                                    {user?.is_shop_owner && <Link to="/shop-owner" className="nav-link" onClick={closeMobile}>Shop Dashboard</Link>}
-                                    <Link to="/dashboard" className="nav-link" onClick={closeMobile}>{t('nav.dashboard')}</Link>
-                                    <Link to="/favorites" className="nav-link" onClick={closeMobile}>{t('nav.favorites')}</Link>
-                                    <Link to="/profile/settings" className="nav-link" onClick={closeMobile}>{t('nav.settings')}</Link>
-                                    <button onClick={handleLogout} className="nav-link mobile-logout">{t('nav.signOut')}</button>
-                                </>
-                            )}
+                        <div className="mobile-drawer-content">
+                            {/* Drawer header */}
+                            <div className="mobile-drawer-header">
+                                <span className="mobile-drawer-logo">🎌 Tattant</span>
+                                {isAuthenticated && (
+                                    <div className="mobile-user-info">
+                                        <span className="mobile-user-avatar">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+                                        <div className="mobile-user-details">
+                                            <span className="mobile-user-name">{user?.name || 'User'}</span>
+                                            <span className="mobile-user-email">{user?.email}</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Navigation */}
+                            <div className="mobile-nav-section">
+                                <Link to="/" className={`mobile-nav-item ${isActive('/') ? 'active' : ''}`} onClick={closeMobile}>
+                                    <span className="mobile-nav-icon">🏠</span> {t('nav.home')}
+                                </Link>
+                                <Link to="/explore" className={`mobile-nav-item ${isActive('/explore') ? 'active' : ''}`} onClick={closeMobile}>
+                                    <span className="mobile-nav-icon">🔍</span> {t('nav.explore')}
+                                </Link>
+                                <Link to="/about-japan" className={`mobile-nav-item ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>
+                                    <span className="mobile-nav-icon">🗾</span> {t('nav.about')}
+                                </Link>
+                            </div>
+
+                            {/* Auth section */}
+                            <div className="mobile-auth-section">
+                                {!isAuthenticated ? (
+                                    <>
+                                        <Link to="/login" className="mobile-auth-btn mobile-login-btn" onClick={closeMobile}>
+                                            <span className="mobile-nav-icon">👤</span> {t('nav.login')}
+                                        </Link>
+                                        <Link to="/register" className="mobile-auth-btn mobile-register-btn" onClick={closeMobile}>
+                                            {t('nav.getStarted')}
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <>
+                                        {user?.is_admin && (
+                                            <Link to="/admin" className="mobile-nav-item admin-item" onClick={closeMobile}>
+                                                <span className="mobile-nav-icon">⚙️</span> {t('nav.adminDashboard')}
+                                            </Link>
+                                        )}
+                                        {user?.is_shop_owner && (
+                                            <Link to="/shop-owner" className="mobile-nav-item shop-item" onClick={closeMobile}>
+                                                <span className="mobile-nav-icon">🏪</span> Shop Dashboard
+                                            </Link>
+                                        )}
+                                        {user?.is_shop_owner && (
+                                            <Link to="/bookings" className="mobile-nav-item" onClick={closeMobile}>
+                                                <span className="mobile-nav-icon">📅</span> Bookings
+                                            </Link>
+                                        )}
+                                        <Link to="/dashboard" className="mobile-nav-item" onClick={closeMobile}>
+                                            <span className="mobile-nav-icon">📊</span> {t('nav.dashboard')}
+                                        </Link>
+                                        <Link to="/favorites" className="mobile-nav-item" onClick={closeMobile}>
+                                            <span className="mobile-nav-icon">❤️</span> {t('nav.favorites')}
+                                        </Link>
+                                        <Link to="/profile/settings" className="mobile-nav-item" onClick={closeMobile}>
+                                            <span className="mobile-nav-icon">⚙️</span> {t('nav.settings')}
+                                        </Link>
+                                        <button onClick={handleLogout} className="mobile-nav-item mobile-logout-btn">
+                                            <span className="mobile-nav-icon">🚪</span> {t('nav.signOut')}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Settings row */}
+                            <div className="mobile-settings-row">
+                                <button onClick={toggleLanguage} className="mobile-setting-btn">
+                                    <span>🌐</span> {currentLang === 'en' ? 'English' : 'Myanmar'}
+                                </button>
+                                <button onClick={toggleTheme} className="mobile-setting-btn">
+                                    {isDarkMode ? '☀️' : '🌙'} {isDarkMode ? 'Light' : 'Dark'}
+                                </button>
+                            </div>
                         </div>
                     )}
                 </nav>
@@ -175,6 +239,11 @@ export default function AppHeader() {
                                     {user?.is_shop_owner && (
                                         <Link to="/shop-owner" className="dropdown-item shop-owner" onClick={closeMenu}>
                                             <span className="dropdown-icon">🏪</span> Shop Dashboard
+                                        </Link>
+                                    )}
+                                    {user?.is_shop_owner && (
+                                        <Link to="/bookings" className="dropdown-item" onClick={closeMenu}>
+                                            <span className="dropdown-icon">📅</span> Bookings
                                         </Link>
                                     )}
                                     <Link to="/dashboard" className="dropdown-item" onClick={closeMenu}>

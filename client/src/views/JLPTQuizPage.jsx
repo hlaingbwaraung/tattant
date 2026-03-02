@@ -25,10 +25,6 @@ function shuffle(array) {
     return a
 }
 
-function playSound(type) {
-    console.log(`🔊 Sound: ${type}`)
-}
-
 export default function JLPTQuizPage() {
     const { t } = useTranslation()
     const navigate = useNavigate()

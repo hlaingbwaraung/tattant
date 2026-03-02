@@ -24,8 +24,9 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
     idle: 10000     // max ms a connection can sit idle
   },
 
-  // Production: require SSL for hosted PostgreSQL (e.g. Render)
-  ...(isProduction && {
+  // Production: enable SSL only when DB_SSL=true (e.g. AWS RDS)
+  // For EC2 local PostgreSQL, leave DB_SSL unset
+  ...(isProduction && process.env.DB_SSL === 'true' && {
     dialectOptions: {
       ssl: { require: true, rejectUnauthorized: false }
     }

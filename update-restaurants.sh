@@ -1,7 +1,7 @@
 #!/bin/bash
 # Update restaurants in production DB: Replace fake Japanese restaurants with real Burmese restaurants in Tokyo
 
-sudo -u postgres psql -d suteki << 'EOSQL'
+sudo -u postgres psql -d tattant << 'EOSQL'
 
 -- First, get category IDs
 DO $$

@@ -1,6 +1,6 @@
 ﻿@echo off
 echo ========================================
-echo suteki Database Setup Script
+echo tattant Database Setup Script
 echo ========================================
 echo.
 
@@ -17,9 +17,9 @@ echo.
 
 echo Step 2: Creating database...
 echo Please enter your PostgreSQL password when prompted.
-psql -U postgres -c "CREATE DATABASE suteki;" 2>nul
+psql -U postgres -c "CREATE DATABASE tattant;" 2>nul
 if %errorlevel% equ 0 (
-    echo Database 'suteki' created successfully!
+    echo Database 'tattant' created successfully!
 ) else (
     echo Database might already exist or there was an error.
     echo This is usually OK - continuing...
@@ -57,7 +57,7 @@ echo - ~10 sample businesses
 echo - 2 test users
 echo.
 echo Test Accounts:
-echo   Admin: admin@suteki.com / admin123
+echo   Admin: admin@tattant.com / admin123
 echo   User:  test@example.com / test123
 echo.
 echo Next steps:

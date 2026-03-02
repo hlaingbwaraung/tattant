@@ -8,6 +8,7 @@
 import React from 'react'
 import useThemeStore from './store/useThemeStore'
 import AppRoutes from './router'
+import ChatBot from './components/ui/ChatBot'
 
 export default function App() {
     // Trigger theme initialization (the store applies dark/light class on creation)
@@ -16,6 +17,7 @@ export default function App() {
     return (
         <div id="app">
             <AppRoutes />
+            <ChatBot />
         </div>
     )
 }

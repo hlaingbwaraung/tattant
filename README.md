@@ -1,6 +1,7 @@
-# suteki - Japan Tourist Guide Platform
+# Tattant - Japan Tourist Guide Platform
 
-A modern, mobile-first platform for first-time visitors to Japan. Built with Vue.js and Node.js.
+A modern, mobile-first platform for first-time visitors to Japan. Built with React and Node.js.
+Live at: https://tattant.com
 
 ## Features
 
@@ -55,7 +56,7 @@ npm install
 **Backend (.env in server/):**
 ```env
 # Copy from server/.env.example
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/suteki
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/tattant
 JWT_SECRET=your-super-secret-jwt-key
 FRONTEND_URL=http://localhost:5173
 # ... see .env.example for all variables
@@ -105,14 +106,14 @@ npm run dev
 
 After running the seed script:
 
-- **Admin:** admin@suteki.com / admin123
+- **Admin:** admin@tattant.com / admin123
 - **User:** test@example.com / test123
 
 ## Project Structure
 
 ```
-suteki/
-├── client/                 # Vue.js frontend
+tattant/
+├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/    # Reusable components
 │   │   ├── views/         # Page components

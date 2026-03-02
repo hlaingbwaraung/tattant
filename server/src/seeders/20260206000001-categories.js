@@ -1,46 +1,36 @@
-'use strict'
-const { v4: uuidv4 } = require('uuid')
+'use strict';
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const categories = [
       {
         id: uuidv4(),
-        name_en: 'Telecom & SIM Cards',
-        name_my: 'SIM ကတ်နှင့် အင်တာနက်',
-        icon: '📶',
-        slug: 'sim-cards',
+        name_en: 'Phone & SIM cards',
+        name_my: 'ဖုန်းနှင့် ဆင်းကတ်များ',
+        icon: '📱',
+        slug: 'phone-and-sim-cards',
         display_order: 1,
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
-        name_en: 'Ramen Restaurants',
-        name_my: 'ရာမင်ဆိုင်များ',
-        icon: '🍜',
-        slug: 'ramen',
+        name_en: 'Restaurants',
+        name_my: 'စားသောက်ဆိုင်များ',
+        icon: '🍽️',
+        slug: 'restaurants',
         display_order: 2,
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
-        name_en: 'Sushi Restaurants',
-        name_my: 'ဆူရှီဆိုင်များ',
-        icon: '🍣',
-        slug: 'sushi',
+        name_en: 'Real Estate',
+        name_my: 'အိမ်ခြံမြေ',
+        icon: '🏠',
+        slug: 'real-estate',
         display_order: 3,
-        created_at: new Date(),
-        updated_at: new Date()
-      },
-      {
-        id: uuidv4(),
-        name_en: 'Yakiniku & BBQ',
-        name_my: 'ယာကိနိကု (အသားကင်)',
-        icon: '🥩',
-        slug: 'yakiniku',
-        display_order: 4,
         created_at: new Date(),
         updated_at: new Date()
       },
@@ -49,27 +39,27 @@ module.exports = {
         name_en: 'Book Stores',
         name_my: 'စာအုပ်ဆိုင်များ',
         icon: '📚',
-        slug: 'bookstores',
-        display_order: 5,
+        slug: 'book-stores',
+        display_order: 4,
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
         name_en: 'Currency Exchange',
-        name_my: 'ငွေလဲလှယ်ရေး',
+        name_my: 'ငွေလွှဲနှင့်ငွေလဲ',
         icon: '💱',
         slug: 'currency-exchange',
-        display_order: 6,
+        display_order: 5,
         created_at: new Date(),
         updated_at: new Date()
       }
-    ]
+    ];
 
-    await queryInterface.bulkInsert('categories', categories, {})
+    await queryInterface.bulkInsert('categories', categories, {});
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('categories', null, {})
+    await queryInterface.bulkDelete('categories', null, {});
   }
-}
+};

@@ -8,7 +8,7 @@
 
 2. **Update server/.env with your password**
    ```env
-   DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/suteki
+   DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/tattant
    DB_PASSWORD=YOUR_PASSWORD
    ```
 
@@ -19,13 +19,13 @@
    ```
 
    This will:
-   - Create the `suteki` database
+   - Create the `tattant` database
    - Run all migrations (create tables)
    - Seed initial data
 
 4. **Verify setup**
    ```bash
-   psql -U postgres -d suteki
+   psql -U postgres -d tattant
    \dt                    # List all tables
    SELECT COUNT(*) FROM businesses;  # Should show ~10
    \q                     # Exit
@@ -46,7 +46,7 @@
 
 2. **Update server/.env with your password**
    ```env
-   DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/suteki
+   DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/tattant
    DB_PASSWORD=YOUR_PASSWORD
    ```
 
@@ -61,7 +61,7 @@
 
 4. **Verify setup**
    ```bash
-   psql -U postgres -d suteki
+   psql -U postgres -d tattant
    \dt                    # List all tables
    SELECT COUNT(*) FROM businesses;  # Should show ~10
    \q                     # Exit
@@ -72,7 +72,7 @@
 ```bash
 # 1. Create database
 psql -U postgres
-CREATE DATABASE suteki;
+CREATE DATABASE tattant;
 \q
 
 # 2. Run migrations
@@ -104,7 +104,7 @@ npm run db:seed
 - Travelex (Currency Exchange)
 
 **2 Test Users:**
-- Admin: `admin@suteki.com` / `admin123`
+- Admin: `admin@tattant.com` / `admin123`
 - User: `test@example.com` / `test123`
 
 ## Test the Backend
@@ -132,9 +132,9 @@ curl http://localhost:5000/health
 - Wrong password in `.env`
 - Reset: `ALTER USER postgres WITH PASSWORD 'newpassword';`
 
-### "database suteki already exists"
+### "database tattant already exists"
 - This is fine! Just continue with migrations
-- Or drop and recreate: `DROP DATABASE suteki; CREATE DATABASE suteki;`
+- Or drop and recreate: `DROP DATABASE tattant; CREATE DATABASE tattant;`
 
 ### "relation already exists" during migration
 - Tables already created

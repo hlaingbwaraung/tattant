@@ -79,6 +79,12 @@ const useAuthStore = create((set, get) => {
             }
         },
 
+        /** Update user object in store + localStorage */
+        setUser: (user) => {
+            localStorage.setItem('user', JSON.stringify(user))
+            set({ user })
+        },
+
         /** Clear session */
         logout: () => {
             localStorage.removeItem('token')
@@ -90,16 +96,11 @@ const useAuthStore = create((set, get) => {
         fetchUser: async () => {
             try {
                 set({ loading: true })
-                const response = await fetch('/api/v1/auth/me', {
-                    headers: { Authorization: `Bearer ${get().token}` }
-                })
-                if (response.ok) {
-                    const data = await response.json()
-                    set({ user: data.data, loading: false })
-                } else {
-                    get().logout()
-                    set({ loading: false })
-                }
+                const { getMe } = await import('../services/authService')
+                const response = await getMe()
+                const user = response.data?.data || response.data
+                localStorage.setItem('user', JSON.stringify(user))
+                set({ user, loading: false })
             } catch (err) {
                 console.error('Failed to fetch user:', err)
                 get().logout()

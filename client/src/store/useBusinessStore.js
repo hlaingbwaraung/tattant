@@ -23,7 +23,9 @@ const useBusinessStore = create((set, get) => ({
         try {
             set({ loading: true, error: null })
             const response = await getBusinesses(params)
-            set({ businesses: response.data, loading: false })
+            // API returns { count, businesses } — extract the array
+            const data = response.data
+            set({ businesses: data.businesses ?? data, loading: false })
             return response
         } catch (err) {
             set({ error: err.response?.data?.error || 'Failed to fetch businesses', loading: false })

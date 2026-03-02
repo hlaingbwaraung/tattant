@@ -1,13 +1,13 @@
 databases:
-  - name: suteki-db
+  - name: tattant-db
     plan: free
-    databaseName: suteki
-    user: suteki_user
+    databaseName: tattant
+    user: tattant_user
 
 services:
   - type: web
     plan: free
-    name: suteki-api
+    name: tattant-api
     runtime: node
     rootDir: server
     buildCommand: npm install && npx sequelize-cli db:migrate
@@ -17,12 +17,12 @@ services:
         value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: suteki-db
+          name: tattant-db
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://hlaingbwaraung.github.io
+        value: https://tattant.com
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET

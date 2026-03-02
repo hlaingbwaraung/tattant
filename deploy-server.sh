@@ -30,10 +30,20 @@ EOF
 cat > /opt/tattant-server/.env << 'EOF'
 NODE_ENV=production
 PORT=5000
-DATABASE_URL=postgresql://suteki:suteki_pass_2026@localhost:5432/suteki
+DATABASE_URL=postgresql://tattant:tattant_pass_2026@localhost:5432/tattant
 JWT_SECRET=tattant_jwt_secret_2026_production_key
 JWT_EXPIRES_IN=7d
 FRONTEND_URL=https://www.tattant.com
+
+# Google OAuth
+GOOGLE_CLIENT_ID=42655523729-p7n6gum8okmufu3tj6abb7b6olenvdsm.apps.googleusercontent.com
+
+# Email
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=hba.nihon@gmail.com
+EMAIL_PASSWORD=xsin dqco ewdt tczj
+EMAIL_FROM="tattant <noreply@tattant.com>"
 EOF
 
 # Update config.json for production to use local DB without SSL

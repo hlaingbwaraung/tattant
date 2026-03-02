@@ -2,7 +2,7 @@
  * Vite Configuration
  *
  * - Uses the React plugin for JSX compilation
- * - Sets base path to /tattant/ for GitHub Pages deployment
+ * - Sets base path to /tattant/ for production deployment
  * - Proxies /api requests to the Express backend during local dev
  */
 
@@ -12,7 +12,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
 
-  // Sub-directory base for GitHub Pages
+  // Sub-directory base for production
   base: '/tattant/',
 
   server: {

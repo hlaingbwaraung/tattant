@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, #08080c 0%, #0e0e14 50%, #12121c 100%);
   overflow: hidden;
 }
 .aj-hero-overlay {
@@ -156,7 +156,7 @@
   box-shadow: var(--shadow-lg);
 }
 .aj-featured-image {
-  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+  background: linear-gradient(135deg, #08080c 0%, #12121c 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,7 +227,7 @@
   box-shadow: var(--shadow-lg);
 }
 .aj-card-image {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, #08080c 0%, #0e0e14 100%);
   height: 180px;
   display: flex;
   align-items: center;
@@ -275,7 +275,7 @@
   display: flex;
   justify-content: space-between;
   color: var(--text-tertiary);
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
 }
 
 /* ===== MODAL ===== */
@@ -309,8 +309,8 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: rgba(255,255,255,0.15);
@@ -325,7 +325,7 @@
 }
 .aj-modal-close:hover { background: rgba(255,255,255,0.3); }
 .aj-modal-hero {
-  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+  background: linear-gradient(135deg, #08080c 0%, #12121c 100%);
   height: 200px;
   display: flex;
   align-items: center;

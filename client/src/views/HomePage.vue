@@ -149,7 +149,7 @@
       <div class="section-container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <div class="footer-logo">🎌 Suteki</div>
+            <div class="footer-logo">🎌 Tattant</div>
             <p class="footer-tagline">{{ $t('footer.tagline') }}</p>
           </div>
           <div class="footer-links">

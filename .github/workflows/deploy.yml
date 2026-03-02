@@ -1,22 +1,17 @@
-# Deploy Vue client to GitHub Pages
-name: Deploy to GitHub Pages
+# Build and deploy client to EC2
+name: Deploy to EC2
 
 on:
   push:
     branches: ['main']
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: 'pages'
+  group: 'deploy'
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,23 +30,38 @@ jobs:
       - name: Build
         run: cd client && npm run build
         env:
-          VITE_API_URL: https://suteki-api.onrender.com/api
+          VITE_API_URL: https://tattant.com/api
+          VITE_GOOGLE_CLIENT_ID: 42655523729-p7n6gum8okmufu3tj6abb7b6olenvdsm.apps.googleusercontent.com
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy client to EC2
+        uses: easingthemes/ssh-deploy@main
         with:
-          path: client/dist
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.EC2_HOST }}
+          REMOTE_USER: ${{ secrets.EC2_USER }}
+          SOURCE: client/dist/
+          TARGET: /var/www/tattant/
+          ARGS: -rlgoDzvc -i --delete
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy server to EC2
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.EC2_HOST }}
+          REMOTE_USER: ${{ secrets.EC2_USER }}
+          SOURCE: server/
+          TARGET: /opt/tattant-server/
+          EXCLUDE: node_modules/, .env
+          ARGS: -rlgoDzvc -i
+
+      - name: Restart server on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /opt/tattant-server
+            npm install --production
+            npx sequelize-cli db:migrate
+            pm2 restart tattant-server || pm2 start src/server.js --name tattant-server

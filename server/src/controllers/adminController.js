@@ -18,7 +18,7 @@ exports.getAllUsers = async (req, res) => {
     }
 
     const users = await User.findAll({
-      attributes: ['id', 'email', 'name', 'preferred_language', 'email_verified', 'is_admin', 'is_premium', 'premium_type', 'premium_expires_at', 'google_id', 'birthdate', 'created_at', 'updated_at'],
+      attributes: ['id', 'email', 'name', 'preferred_language', 'email_verified', 'is_admin', 'is_shop_owner', 'is_premium', 'premium_type', 'premium_expires_at', 'google_id', 'birthdate', 'created_at', 'updated_at'],
       order: [['created_at', 'DESC']]
     })
 
@@ -229,5 +229,178 @@ exports.resetUserPassword = async (req, res) => {
   } catch (error) {
     console.error('Reset user password error:', error)
     res.status(500).json({ message: 'Server error while resetting password' })
+  }
+}
+
+// Toggle shop owner status (admin only)
+exports.toggleShopOwner = async (req, res) => {
+  try {
+    if (!req.user.is_admin) {
+      return res.status(403).json({ message: 'Access denied. Admin only.' })
+    }
+
+    const { userId } = req.params
+    const { is_shop_owner } = req.body
+
+    const user = await User.findByPk(userId)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    user.is_shop_owner = is_shop_owner
+    await user.save()
+
+    res.json({
+      message: `Shop owner ${is_shop_owner ? 'enabled' : 'disabled'} for user`,
+      user: {
+        id: user.id,
+        email: user.email,
+        is_shop_owner: user.is_shop_owner
+      }
+    })
+  } catch (error) {
+    console.error('Toggle shop owner error:', error)
+    res.status(500).json({ message: 'Server error while updating shop owner status' })
+  }
+}
+
+// Create shop owner account (admin only)
+exports.createShopOwner = async (req, res) => {
+  try {
+    if (!req.user.is_admin) {
+      return res.status(403).json({ message: 'Access denied. Admin only.' })
+    }
+
+    const { email, password, name } = req.body
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' })
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' })
+    }
+
+    // Check if email already exists
+    const existing = await User.findOne({ where: { email } })
+    if (existing) {
+      return res.status(400).json({ message: 'Email already registered' })
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const password_hash = await bcrypt.hash(password, salt)
+
+    const user = await User.create({
+      email,
+      password_hash,
+      name: name || email.split('@')[0],
+      is_shop_owner: true,
+      email_verified: true,
+      preferred_language: 'en'
+    })
+
+    res.status(201).json({
+      message: 'Shop owner account created successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        is_shop_owner: user.is_shop_owner
+      }
+    })
+  } catch (error) {
+    console.error('Create shop owner error:', error)
+    res.status(500).json({ message: 'Server error while creating shop owner' })
+  }
+}
+
+// Assign business to shop owner (admin only)
+exports.assignBusiness = async (req, res) => {
+  try {
+    if (!req.user.is_admin) {
+      return res.status(403).json({ message: 'Access denied. Admin only.' })
+    }
+
+    const { userId } = req.params
+    const { business_id } = req.body
+
+    const { Business } = require('../models')
+
+    const user = await User.findByPk(userId)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    const business = await Business.findByPk(business_id)
+    if (!business) {
+      return res.status(404).json({ message: 'Business not found' })
+    }
+
+    business.owner_id = userId
+    await business.save()
+
+    // Make sure the user is marked as a shop owner
+    if (!user.is_shop_owner) {
+      user.is_shop_owner = true
+      await user.save()
+    }
+
+    res.json({
+      message: `Business "${business.name}" assigned to ${user.email}`,
+      business: { id: business.id, name: business.name, owner_id: business.owner_id }
+    })
+  } catch (error) {
+    console.error('Assign business error:', error)
+    res.status(500).json({ message: 'Server error while assigning business' })
+  }
+}
+
+/**
+ * Toggle Premier Shop Owner status (admin only).
+ *
+ * Premier owners get access to the full booking management system.
+ * Sets: is_shop_owner=true, is_premium=true, premium_type='premier'
+ * Revoke: is_premium=false, premium_type=null (keeps is_shop_owner)
+ */
+exports.togglePremierOwner = async (req, res) => {
+  try {
+    if (!req.user.is_admin) {
+      return res.status(403).json({ message: 'Access denied. Admin only.' })
+    }
+
+    const { userId } = req.params
+    const { is_premier } = req.body
+
+    const user = await User.findByPk(userId)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    if (is_premier) {
+      user.is_shop_owner = true
+      user.is_premium = true
+      user.premium_type = 'premier'
+      user.premium_expires_at = null  // never expires by default
+    } else {
+      user.is_premium = false
+      user.premium_type = null
+      user.premium_expires_at = null
+    }
+
+    await user.save()
+
+    res.json({
+      message: `Premier Shop Owner ${is_premier ? 'granted' : 'revoked'} for ${user.email}`,
+      user: {
+        id: user.id,
+        email: user.email,
+        is_shop_owner: user.is_shop_owner,
+        is_premium: user.is_premium,
+        premium_type: user.premium_type
+      }
+    })
+  } catch (error) {
+    console.error('Toggle premier owner error:', error)
+    res.status(500).json({ message: 'Server error while updating premier status' })
   }
 }

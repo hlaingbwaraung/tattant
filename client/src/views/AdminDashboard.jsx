@@ -1,16 +1,15 @@
 /**
  * AdminDashboard – Central admin panel: Users, Blogs, Categories, Shops management.
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import axios from 'axios'
+import api from '../services/api'
 import AppHeader from '../components/layout/AppHeader'
 import useAuthStore from '../store/useAuthStore'
+import { getAllRequests, approveRequest, rejectRequest } from '../services/shopOwnerRequestService'
+import { getAllContactMessages, markMessageAsRead, replyToMessage, deleteContactMessage } from '../services/contactService'
 import './AdminDashboard.css'
-
-const API = '/api'
-const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` })
 
 const emptyBlogForm = { title: '', title_my: '', emoji: '📝', photo: '', category: '', tag: '', excerpt: '', excerpt_my: '', content: '', content_my: '', read_time: '5 min read', published: true }
 const emptyCategoryForm = { name_en: '', name_my: '', icon: '📁', slug: '', display_order: 0 }
@@ -43,6 +42,8 @@ export default function AdminDashboard() {
     const [adminPwModal, setAdminPwModal] = useState({ show: false, user: null })
     const [adminPassword, setAdminPassword] = useState('')
     const [adminToggleSaving, setAdminToggleSaving] = useState(false)
+    const [userSearch, setUserSearch] = useState('')
+    const [userRoleFilter, setUserRoleFilter] = useState('all')
 
     // Blogs
     const [blogs, setBlogs] = useState([])
@@ -77,16 +78,36 @@ export default function AdminDashboard() {
     const [shopTagsText, setShopTagsText] = useState('')
     const [shopLangsText, setShopLangsText] = useState('')
 
+    // Shop Owner Requests
+    const [requests, setRequests] = useState([])
+    const [requestCounts, setRequestCounts] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 })
+    const [requestLoading, setRequestLoading] = useState(false)
+    const [requestError, setRequestError] = useState('')
+    const [requestFilter, setRequestFilter] = useState('pending')
+    const [rejectModal, setRejectModal] = useState({ show: false, request: null })
+    const [rejectNote, setRejectNote] = useState('')
+    const [requestActionLoading, setRequestActionLoading] = useState(false)
+
+    // Contact Messages
+    const [contactMessages, setContactMessages] = useState([])
+    const [contactCounts, setContactCounts] = useState({ total: 0, unread: 0, read: 0, replied: 0, archived: 0 })
+    const [contactLoading, setContactLoading] = useState(false)
+    const [contactError, setContactError] = useState('')
+    const [contactFilter, setContactFilter] = useState('')
+    const [replyModal, setReplyModal] = useState({ show: false, message: null })
+    const [replyText, setReplyText] = useState('')
+    const [replySaving, setReplySaving] = useState(false)
+    const [deleteContactModal, setDeleteContactModal] = useState({ show: false, message: null })
+
     const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 
     // ========== USER MANAGEMENT ==========
     const loadData = useCallback(async () => {
         try {
             setLoading(true); setError('')
-            const headers = authHeaders()
             const [usersRes, statsRes] = await Promise.all([
-                axios.get(`${API}/admin/users`, { headers }),
-                axios.get(`${API}/admin/stats`, { headers })
+                api.get('/admin/users'),
+                api.get('/admin/stats')
             ])
             setUsers(usersRes.data.users); setStats(statsRes.data)
         } catch (err) {
@@ -100,23 +121,32 @@ export default function AdminDashboard() {
         e.preventDefault(); setAdminToggleSaving(true)
         const u = adminPwModal.user
         try {
-            await axios.patch(`${API}/admin/users/${u.id}/admin`, { is_admin: !u.is_admin, admin_password: adminPassword }, { headers: authHeaders() })
+            await api.patch(`/admin/users/${u.id}/admin`, { is_admin: !u.is_admin, admin_password: adminPassword })
             setAdminPwModal({ show: false, user: null }); setAdminPassword(''); await loadData()
         } catch (err) { alert(err.response?.data?.message || 'Failed to update admin status') }
         finally { setAdminToggleSaving(false) }
     }
     const togglePremium = async (u) => {
-        try { await axios.patch(`${API}/admin/users/${u.id}/premium`, { is_premium: !u.is_premium, premium_type: u.is_premium ? null : 'lifetime' }, { headers: authHeaders() }); await loadData() }
+        try { await api.patch(`/admin/users/${u.id}/premium`, { is_premium: !u.is_premium, premium_type: u.is_premium ? null : 'lifetime' }); await loadData() }
         catch { alert('Failed to update premium status') }
     }
+    const togglePremierOwner = async (u) => {
+        const isPremier = u.is_shop_owner && u.premium_type === 'premier'
+        const action = isPremier ? 'revoke Premier Shop Owner from' : 'grant Premier Shop Owner to'
+        if (!window.confirm(`Are you sure you want to ${action} ${u.email}?`)) return
+        try {
+            await api.patch(`/admin/users/${u.id}/premier-owner`, { is_premier: !isPremier })
+            await loadData()
+        } catch { alert('Failed to update premier owner status') }
+    }
     const deleteUser = async () => {
-        try { await axios.delete(`${API}/admin/users/${deleteModal.user.id}`, { headers: authHeaders() }); setDeleteModal({ show: false, user: null }); await loadData() }
+        try { await api.delete(`/admin/users/${deleteModal.user.id}`); setDeleteModal({ show: false, user: null }); await loadData() }
         catch { alert('Failed to delete user') }
     }
     const resetUserPassword = async (e) => {
         e.preventDefault(); setResetSaving(true)
         try {
-            await axios.patch(`${API}/admin/users/${resetPwModal.user.id}/password`, { new_password: newPassword }, { headers: authHeaders() })
+            await api.patch(`/admin/users/${resetPwModal.user.id}/password`, { new_password: newPassword })
             alert(`Password reset successfully for ${resetPwModal.user.email}`)
             setResetPwModal({ show: false, user: null }); setNewPassword('')
         } catch (err) { alert(err.response?.data?.message || 'Failed to reset password') }
@@ -127,10 +157,9 @@ export default function AdminDashboard() {
     const loadBlogs = useCallback(async () => {
         try {
             setBlogLoading(true); setBlogError('')
-            const headers = authHeaders()
             const [blogsRes, statsRes] = await Promise.all([
-                axios.get(`${API}/blogs`, { headers }),
-                axios.get(`${API}/blogs/admin/stats`, { headers })
+                api.get('/blogs'),
+                api.get('/blogs/admin/stats')
             ])
             setBlogs(blogsRes.data.data); setBlogStats(statsRes.data.data)
         } catch { setBlogError('Failed to load blogs') }
@@ -144,15 +173,14 @@ export default function AdminDashboard() {
     const saveBlog = async (e) => {
         e.preventDefault(); setBlogSaving(true)
         try {
-            const headers = authHeaders()
-            if (blogFormModal.blog) await axios.put(`${API}/blogs/${blogFormModal.blog.id}`, blogForm, { headers })
-            else await axios.post(`${API}/blogs`, blogForm, { headers })
+            if (blogFormModal.blog) await api.put(`/blogs/${blogFormModal.blog.id}`, blogForm)
+            else await api.post('/blogs', blogForm)
             setBlogFormModal({ show: false, blog: null }); await loadBlogs()
         } catch (err) { alert(err.response?.data?.error || 'Failed to save blog') }
         finally { setBlogSaving(false) }
     }
     const deleteBlog = async () => {
-        try { await axios.delete(`${API}/blogs/${deleteBlogModal.blog.id}`, { headers: authHeaders() }); setDeleteBlogModal({ show: false, blog: null }); await loadBlogs() }
+        try { await api.delete(`/blogs/${deleteBlogModal.blog.id}`); setDeleteBlogModal({ show: false, blog: null }); await loadBlogs() }
         catch { alert('Failed to delete blog') }
     }
 
@@ -160,10 +188,9 @@ export default function AdminDashboard() {
     const loadCategories = useCallback(async () => {
         try {
             setCategoryLoading(true); setCategoryError('')
-            const headers = authHeaders()
             const [catsRes, statsRes] = await Promise.all([
-                axios.get(`${API}/categories`, { headers }),
-                axios.get(`${API}/categories/admin/stats`, { headers })
+                api.get('/categories'),
+                api.get('/categories/admin/stats')
             ])
             setCategories(catsRes.data.categories); setCategoryStats(statsRes.data.data)
         } catch { setCategoryError('Failed to load categories') }
@@ -177,15 +204,14 @@ export default function AdminDashboard() {
     const saveCategory = async (e) => {
         e.preventDefault(); setCategorySaving(true)
         try {
-            const headers = authHeaders()
-            if (categoryFormModal.category) await axios.put(`${API}/categories/${categoryFormModal.category.id}`, categoryForm, { headers })
-            else await axios.post(`${API}/categories`, categoryForm, { headers })
+            if (categoryFormModal.category) await api.put(`/categories/${categoryFormModal.category.id}`, categoryForm)
+            else await api.post('/categories', categoryForm)
             setCategoryFormModal({ show: false, category: null }); await loadCategories()
         } catch (err) { alert(err.response?.data?.error || 'Failed to save category') }
         finally { setCategorySaving(false) }
     }
     const deleteCategory = async () => {
-        try { await axios.delete(`${API}/categories/${deleteCategoryModal.category.id}`, { headers: authHeaders() }); setDeleteCategoryModal({ show: false, category: null }); await loadCategories() }
+        try { await api.delete(`/categories/${deleteCategoryModal.category.id}`); setDeleteCategoryModal({ show: false, category: null }); await loadCategories() }
         catch { alert('Failed to delete category') }
     }
 
@@ -193,10 +219,9 @@ export default function AdminDashboard() {
     const loadShops = useCallback(async () => {
         try {
             setShopLoading(true); setShopError('')
-            const headers = authHeaders()
             const [shopsRes, statsRes] = await Promise.all([
-                axios.get(`${API}/businesses`, { headers }),
-                axios.get(`${API}/businesses/admin/stats`, { headers })
+                api.get('/businesses'),
+                api.get('/businesses/admin/stats')
             ])
             setShops(shopsRes.data.businesses || shopsRes.data.data || []); setShopStats(statsRes.data.data)
         } catch { setShopError('Failed to load shops') }
@@ -237,7 +262,6 @@ export default function AdminDashboard() {
     const saveShop = async (e) => {
         e.preventDefault(); setShopSaving(true)
         try {
-            const headers = authHeaders()
             let categoryId = shopForm.category_id
 
             if (typeof categoryId === 'string' && categoryId.startsWith('new:')) {
@@ -248,13 +272,13 @@ export default function AdminDashboard() {
                 if (existingCategory) {
                     categoryId = existingCategory.id
                 } else if (preset) {
-                    const createRes = await axios.post(`${API}/categories`, {
+                    const createRes = await api.post('/categories', {
                         name_en: preset.name_en,
                         name_my: preset.name_my,
                         icon: preset.icon,
                         slug: preset.slug,
                         display_order: categories.length + 1
-                    }, { headers })
+                    })
                     categoryId = createRes.data?.data?.id
                     await loadCategories()
                 }
@@ -267,25 +291,128 @@ export default function AdminDashboard() {
                 tags: shopTagsText.split(',').map(s => s.trim()).filter(Boolean),
                 languages_supported: shopLangsText.split(',').map(s => s.trim()).filter(Boolean)
             }
-            if (shopFormModal.shop) await axios.put(`${API}/businesses/${shopFormModal.shop.id}`, data, { headers })
-            else await axios.post(`${API}/businesses`, data, { headers })
+            if (shopFormModal.shop) await api.put(`/businesses/${shopFormModal.shop.id}`, data)
+            else await api.post('/businesses', data)
             setShopFormModal({ show: false, shop: null }); await loadShops()
         } catch (err) { alert(err.response?.data?.error || 'Failed to save shop') }
         finally { setShopSaving(false) }
     }
     const toggleShopActive = async (shop) => {
-        try { await axios.patch(`${API}/businesses/${shop.id}`, { is_active: !shop.is_active }, { headers: authHeaders() }); await loadShops() }
+        try { await api.patch(`/businesses/${shop.id}`, { is_active: !shop.is_active }); await loadShops() }
         catch { alert('Failed to toggle shop status') }
     }
     const deleteShop = async () => {
-        try { await axios.delete(`${API}/businesses/${deleteShopModal.shop.id}`, { headers: authHeaders() }); setDeleteShopModal({ show: false, shop: null }); await loadShops() }
+        try { await api.delete(`/businesses/${deleteShopModal.shop.id}`); setDeleteShopModal({ show: false, shop: null }); await loadShops() }
         catch { alert('Failed to delete shop') }
     }
+
+    // ========== SHOP OWNER REQUESTS ==========
+    const loadRequests = useCallback(async () => {
+        try {
+            setRequestLoading(true); setRequestError('')
+            const res = await getAllRequests(requestFilter)
+            setRequests(res.data.requests || [])
+            setRequestCounts(res.data.counts || { total: 0, pending: 0, approved: 0, rejected: 0 })
+        } catch { setRequestError('Failed to load shop owner requests') }
+        finally { setRequestLoading(false) }
+    }, [requestFilter])
+
+    const handleApproveRequest = async (requestId) => {
+        if (!window.confirm('Approve this shop owner request? This will create a business and grant shop owner access.')) return
+        setRequestActionLoading(true)
+        try {
+            await approveRequest(requestId, {})
+            await loadRequests()
+        } catch (err) { alert(err.response?.data?.message || 'Failed to approve request') }
+        finally { setRequestActionLoading(false) }
+    }
+
+    const handleRejectRequest = async () => {
+        setRequestActionLoading(true)
+        try {
+            await rejectRequest(rejectModal.request.id, { admin_note: rejectNote })
+            setRejectModal({ show: false, request: null }); setRejectNote('')
+            await loadRequests()
+        } catch (err) { alert(err.response?.data?.message || 'Failed to reject request') }
+        finally { setRequestActionLoading(false) }
+    }
+
+    // ========== WEEKLY CHART DATA ==========
+    const weeklyData = useMemo(() => {
+        if (!users.length) return []
+        const weeks = []
+        const now = new Date()
+        for (let i = 7; i >= 0; i--) {
+            const weekStart = new Date(now)
+            weekStart.setDate(now.getDate() - i * 7)
+            weekStart.setHours(0, 0, 0, 0)
+            const weekEnd = new Date(weekStart)
+            weekEnd.setDate(weekStart.getDate() + 7)
+            const count = users.filter(u => {
+                const d = new Date(u.created_at)
+                return d >= weekStart && d < weekEnd
+            }).length
+            const label = `${weekStart.getDate()}/${weekStart.getMonth() + 1}`
+            weeks.push({ label, count, start: weekStart })
+        }
+        return weeks
+    }, [users])
+
+    const filteredUsers = useMemo(() => {
+        let list = users
+        if (userSearch.trim()) {
+            const q = userSearch.toLowerCase()
+            list = list.filter(u => (u.name || '').toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+        }
+        if (userRoleFilter === 'admin') list = list.filter(u => u.is_admin)
+        else if (userRoleFilter === 'premium') list = list.filter(u => u.is_premium)
+        else if (userRoleFilter === 'shop_owner') list = list.filter(u => u.is_shop_owner)
+        else if (userRoleFilter === 'google') list = list.filter(u => u.google_id)
+        return list
+    }, [users, userSearch, userRoleFilter])
 
     useEffect(() => { loadData() }, [loadData])
     useEffect(() => { if (activeTab === 'blogs') loadBlogs() }, [activeTab, loadBlogs])
     useEffect(() => { if (activeTab === 'categories') loadCategories() }, [activeTab, loadCategories])
     useEffect(() => { if (activeTab === 'shops') loadShops() }, [activeTab, loadShops])
+    useEffect(() => { if (activeTab === 'requests') loadRequests() }, [activeTab, loadRequests])
+
+    // ========== CONTACT MESSAGES ==========
+    const loadContacts = useCallback(async () => {
+        try {
+            setContactLoading(true); setContactError('')
+            const res = await getAllContactMessages(contactFilter)
+            setContactMessages(res.data.messages || [])
+            setContactCounts(res.data.counts || { total: 0, unread: 0, read: 0, replied: 0, archived: 0 })
+        } catch { setContactError('Failed to load contact messages') }
+        finally { setContactLoading(false) }
+    }, [contactFilter])
+
+    const handleMarkRead = async (msgId) => {
+        try { await markMessageAsRead(msgId); await loadContacts() }
+        catch { alert('Failed to mark as read') }
+    }
+
+    const handleReply = async () => {
+        if (!replyText.trim()) return
+        setReplySaving(true)
+        try {
+            await replyToMessage(replyModal.message.id, replyText)
+            setReplyModal({ show: false, message: null }); setReplyText('')
+            await loadContacts()
+        } catch (err) { alert(err.response?.data?.message || 'Failed to send reply') }
+        finally { setReplySaving(false) }
+    }
+
+    const handleDeleteContact = async () => {
+        try {
+            await deleteContactMessage(deleteContactModal.message.id)
+            setDeleteContactModal({ show: false, message: null })
+            await loadContacts()
+        } catch { alert('Failed to delete message') }
+    }
+
+    useEffect(() => { if (activeTab === 'contacts') loadContacts() }, [activeTab, loadContacts])
 
     const bf = (field) => (e) => setBlogForm(p => ({ ...p, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
     const cf = (field) => (e) => setCategoryForm(p => ({ ...p, [field]: e.target.type === 'number' ? Number(e.target.value) : e.target.value }))
@@ -314,42 +441,117 @@ export default function AdminDashboard() {
                 <div className="page-header"><h1>👨‍💼 Admin Dashboard</h1><p className="subtitle">Manage Users, Blogs & Statistics</p></div>
 
                 <div className="tab-nav">
-                    {['users', 'blogs', 'categories', 'shops'].map(tab => (
+                    {['users', 'blogs', 'categories', 'shops', 'requests', 'contacts'].map(tab => (
                         <button key={tab} className={`tab-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                            {tab === 'users' ? '👥' : tab === 'blogs' ? '📝' : tab === 'categories' ? '📂' : '🏪'} {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab === 'users' ? '👥' : tab === 'blogs' ? '📝' : tab === 'categories' ? '📂' : tab === 'shops' ? '🏪' : tab === 'requests' ? '📋' : '📩'} {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab === 'requests' && requestCounts.pending > 0 && <span className="badge-count">{requestCounts.pending}</span>}
+                            {tab === 'contacts' && contactCounts.unread > 0 && <span className="badge-count">{contactCounts.unread}</span>}
                         </button>
                     ))}
                 </div>
 
                 {/* ===== USERS TAB ===== */}
                 {activeTab === 'users' && (<>
-                    {stats && <div className="stats-grid">
-                        {[{ icon: '👥', val: stats.totalUsers, lbl: 'Total Users' }, { icon: '✅', val: stats.verifiedUsers, lbl: 'Verified' }, { icon: '🆕', val: stats.newUsersLast7Days, lbl: 'New (7d)' }, { icon: '👨‍💼', val: stats.adminUsers, lbl: 'Admins' }, { icon: '⭐', val: stats.premiumUsers || 0, lbl: 'Premium' }].map((s, i) => (
-                            <div key={i} className="stat-card"><div className="stat-icon">{s.icon}</div><div className="stat-info"><div className="stat-number">{s.val}</div><div className="stat-label">{s.lbl}</div></div></div>
+                    {/* Overview numbers */}
+                    {stats && <div className="user-overview">
+                        {[{ val: stats.totalUsers, lbl: 'Total', cls: '' },
+                          { val: stats.verifiedUsers, lbl: 'Verified', cls: 'verified' },
+                          { val: stats.newUsersLast7Days, lbl: 'This Week', cls: 'new' },
+                          { val: stats.adminUsers, lbl: 'Admins', cls: 'admin' },
+                          { val: stats.premiumUsers || 0, lbl: 'Premium', cls: 'premium' },
+                          { val: stats.googleUsers || 0, lbl: 'Google', cls: 'google' }
+                        ].map((s, i) => (
+                            <div key={i} className={`user-stat-item ${s.cls}`}>
+                                <span className="user-stat-num">{s.val}</span>
+                                <span className="user-stat-lbl">{s.lbl}</span>
+                            </div>
                         ))}
                     </div>}
-                    <div className="users-section"><h2>All Users</h2>
-                        {loading ? <div className="loading">Loading users...</div> : error ? <div className="error">{error}</div> : (
-                            <div className="table-container"><table className="users-table"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></tr></thead><tbody>
-                                {users.map(u => (
-                                    <tr key={u.id}>
-                                        <td><div className="user-name">{u.name || 'N/A'}{u.google_id && <span className="badge google">Google</span>}</div></td>
-                                        <td>{u.email}</td>
-                                        <td><span className={`badge ${u.email_verified ? 'verified' : 'unverified'}`}>{u.email_verified ? '✓ Verified' : '✗ Unverified'}</span></td>
-                                        <td><span className={`badge ${u.is_admin ? 'admin' : 'user'}`}>{u.is_admin ? '👨‍💼 Admin' : '👤 User'}</span></td>
-                                        <td><span className={`badge ${u.is_premium ? 'premium' : 'free'}`}>{u.is_premium ? '⭐ ' + (u.premium_type || 'Premium') : '🆓 Free'}</span></td>
-                                        <td>{formatDate(u.created_at)}</td>
-                                        <td>{u.id !== currentUserId ? (
-                                            <div className="actions">
-                                                <button onClick={() => openAdminToggle(u)} className={`btn-action ${u.is_admin ? 'demote' : 'promote'}`}>{u.is_admin ? '↓ Remove Admin' : '↑ Make Admin'}</button>
-                                                <button onClick={() => togglePremium(u)} className={`btn-action ${u.is_premium ? 'demote' : 'promote'}`}>{u.is_premium ? '⭐ Remove Premium' : '⭐ Give Premium'}</button>
-                                                <button onClick={() => { setResetPwModal({ show: true, user: u }); setNewPassword('') }} className="btn-action promote">🔑 Reset Password</button>
-                                                <button onClick={() => setDeleteModal({ show: true, user: u })} className="btn-action delete">🗑️ Delete</button>
+
+                    {/* Weekly registration chart */}
+                    {weeklyData.length > 0 && (() => {
+                        const maxCount = Math.max(...weeklyData.map(w => w.count), 1)
+                        const barWidth = 40
+                        const gap = 12
+                        const chartHeight = 120
+                        const svgWidth = weeklyData.length * (barWidth + gap)
+                        return (
+                            <div className="user-chart-wrap">
+                                <div className="user-chart-header">
+                                    <span className="user-chart-title">New Users by Week</span>
+                                    <span className="user-chart-total">{users.length} total users</span>
+                                </div>
+                                <div className="user-chart-scroll">
+                                    <svg width={svgWidth} height={chartHeight + 28} className="user-chart-svg">
+                                        {weeklyData.map((w, i) => {
+                                            const barH = Math.max((w.count / maxCount) * chartHeight, 2)
+                                            const x = i * (barWidth + gap) + gap / 2
+                                            const y = chartHeight - barH
+                                            return (
+                                                <g key={i}>
+                                                    <rect x={x} y={y} width={barWidth} height={barH} rx={4} className="user-chart-bar" />
+                                                    {w.count > 0 && <text x={x + barWidth / 2} y={y - 4} textAnchor="middle" className="user-chart-val">{w.count}</text>}
+                                                    <text x={x + barWidth / 2} y={chartHeight + 16} textAnchor="middle" className="user-chart-label">{w.label}</text>
+                                                </g>
+                                            )
+                                        })}
+                                    </svg>
+                                </div>
+                            </div>
+                        )
+                    })()}
+
+                    {/* Search + filter bar */}
+                    <div className="user-toolbar">
+                        <input className="user-search" type="text" placeholder="Search by name or email..." value={userSearch} onChange={e => setUserSearch(e.target.value)} />
+                        <div className="user-filters">
+                            {[{ val: 'all', lbl: 'All' }, { val: 'admin', lbl: 'Admins' }, { val: 'premium', lbl: 'Premium' }, { val: 'shop_owner', lbl: 'Shop Owners' }, { val: 'google', lbl: 'Google' }].map(f => (
+                                <button key={f.val} className={`user-filter-btn${userRoleFilter === f.val ? ' active' : ''}`} onClick={() => setUserRoleFilter(f.val)}>{f.lbl}</button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* User list */}
+                    <div className="user-list-section">
+                        {loading ? <div className="loading">Loading users...</div> : error ? <div className="error">{error}</div> : filteredUsers.length === 0 ? (
+                            <div className="contact-empty">No users found</div>
+                        ) : (
+                            <div className="user-list">
+                                {filteredUsers.map(u => (
+                                    <div key={u.id} className={`user-card${u.id === currentUserId ? ' user-card-self' : ''}`}>
+                                        <div className="user-card-left">
+                                            <div className="user-avatar">{(u.name || u.email)[0].toUpperCase()}</div>
+                                            <div className="user-card-info">
+                                                <div className="user-card-name">
+                                                    {u.name || 'Unnamed'}
+                                                    {u.id === currentUserId && <span className="user-you-tag">You</span>}
+                                                </div>
+                                                <div className="user-card-email">{u.email}</div>
+                                                <div className="user-card-tags">
+                                                    {u.is_admin && <span className="utag utag-admin">Admin</span>}
+                                                    {u.google_id && <span className="utag utag-google">Google</span>}
+                                                    {u.email_verified && <span className="utag utag-verified">Verified</span>}
+                                                    {u.is_premium && <span className="utag utag-premium">{u.premium_type || 'Premium'}</span>}
+                                                    {u.is_shop_owner && <span className="utag utag-shop">Shop Owner</span>}
+                                                    {u.is_shop_owner && u.premium_type === 'premier' && <span className="utag utag-premier">Premier</span>}
+                                                </div>
                                             </div>
-                                        ) : <span className="current-user-badge">You</span>}</td>
-                                    </tr>
+                                        </div>
+                                        <div className="user-card-right">
+                                            <span className="user-card-date">{formatDate(u.created_at)}</span>
+                                            {u.id !== currentUserId && (
+                                                <div className="user-card-actions">
+                                                    <button onClick={() => openAdminToggle(u)} className={`ubtn ${u.is_admin ? 'ubtn-warn' : 'ubtn-default'}`}>{u.is_admin ? 'Remove Admin' : 'Make Admin'}</button>
+                                                    <button onClick={() => togglePremium(u)} className={`ubtn ${u.is_premium ? 'ubtn-warn' : 'ubtn-default'}`}>{u.is_premium ? 'Remove Premium' : 'Give Premium'}</button>
+                                                    <button onClick={() => togglePremierOwner(u)} className={`ubtn ${u.is_shop_owner && u.premium_type === 'premier' ? 'ubtn-warn' : 'ubtn-accent'}`}>{u.is_shop_owner && u.premium_type === 'premier' ? 'Revoke Premier' : 'Grant Premier'}</button>
+                                                    <button onClick={() => { setResetPwModal({ show: true, user: u }); setNewPassword('') }} className="ubtn ubtn-default">Reset PW</button>
+                                                    <button onClick={() => setDeleteModal({ show: true, user: u })} className="ubtn ubtn-danger">Delete</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 ))}
-                            </tbody></table></div>
+                            </div>
                         )}
                     </div>
                 </>)}
@@ -443,29 +645,186 @@ export default function AdminDashboard() {
                         {!shopLoading && !shopError && shops.length === 0 && <div className="loading">No shops found.</div>}
                     </div>
                 </>)}
+                {/* ===== REQUESTS TAB ===== */}
+                {activeTab === 'requests' && (<>
+                    <div className="stats-grid">
+                        {[{ icon: '📋', val: requestCounts.total, lbl: 'Total Requests' }, { icon: '⏳', val: requestCounts.pending, lbl: 'Pending' }, { icon: '✅', val: requestCounts.approved, lbl: 'Approved' }, { icon: '❌', val: requestCounts.rejected, lbl: 'Rejected' }].map((s, i) => (
+                            <div key={i} className="stat-card"><div className="stat-icon">{s.icon}</div><div className="stat-info"><div className="stat-number">{s.val}</div><div className="stat-label">{s.lbl}</div></div></div>
+                        ))}
+                    </div>
+                    <div className="blogs-section">
+                        <div className="section-header">
+                            <h2>Shop Owner Requests</h2>
+                            <select className="filter-select" value={requestFilter} onChange={e => setRequestFilter(e.target.value)}>
+                                <option value="">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        {requestLoading ? <div className="loading">Loading requests...</div> : requestError ? <div className="error">{requestError}</div> : requests.length === 0 ? (
+                            <div className="loading">No {requestFilter || ''} requests found.</div>
+                        ) : (
+                            <div className="requests-list">
+                                {requests.map(req => (
+                                    <div key={req.id} className={`request-card request-${req.status}`}>
+                                        <div className="request-header">
+                                            <div className="request-user">
+                                                <span className="request-avatar">👤</span>
+                                                <div>
+                                                    <strong>{req.user?.name || 'Unknown'}</strong>
+                                                    <span className="request-email">{req.user?.email}</span>
+                                                </div>
+                                            </div>
+                                            <span className={`status-badge status-${req.status}`}>{req.status === 'pending' ? '⏳ Pending' : req.status === 'approved' ? '✅ Approved' : '❌ Rejected'}</span>
+                                        </div>
+                                        <div className="request-details">
+                                            <div className="request-detail"><strong>🏪 Shop Name:</strong> {req.shop_name}</div>
+                                            <div className="request-detail"><strong>📂 Category:</strong> {req.shop_category || 'N/A'}</div>
+                                            {req.shop_description && <div className="request-detail"><strong>📝 Description:</strong> {req.shop_description}</div>}
+                                            {req.shop_phone && <div className="request-detail"><strong>📞 Phone:</strong> {req.shop_phone}</div>}
+                                            {req.shop_address && <div className="request-detail"><strong>📍 Address:</strong> {req.shop_address}</div>}
+                                            {req.message && <div className="request-detail"><strong>💬 Message:</strong> {req.message}</div>}
+                                            <div className="request-detail"><strong>📅 Submitted:</strong> {formatDate(req.createdAt || req.created_at)}</div>
+                                            {req.admin_note && <div className="request-detail"><strong>📝 Admin Note:</strong> {req.admin_note}</div>}
+                                        </div>
+                                        {req.status === 'pending' && (
+                                            <div className="request-actions">
+                                                <button className="btn-action promote" disabled={requestActionLoading} onClick={() => handleApproveRequest(req.id)}>✅ Approve</button>
+                                                <button className="btn-action delete" disabled={requestActionLoading} onClick={() => { setRejectModal({ show: true, request: req }); setRejectNote('') }}>❌ Reject</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </>)}
+
+                {/* ===== CONTACTS TAB ===== */}
+                {activeTab === 'contacts' && (<>
+                    <div className="contact-stats-bar">
+                        {[{ val: contactCounts.total, lbl: 'All', filter: '' },
+                          { val: contactCounts.unread, lbl: 'Unread', filter: 'unread' },
+                          { val: contactCounts.read, lbl: 'Read', filter: 'read' },
+                          { val: contactCounts.replied, lbl: 'Replied', filter: 'replied' },
+                          { val: contactCounts.archived, lbl: 'Archived', filter: 'archived' }
+                        ].map(s => (
+                            <button key={s.filter} className={`contact-stat-pill ${s.filter || 'all'}${contactFilter === s.filter ? ' active' : ''}`} onClick={() => setContactFilter(s.filter)}>
+                                {s.filter && <span className={`contact-dot dot-${s.filter}`} />}
+                                <span className="contact-stat-count">{s.val}</span>
+                                <span className="contact-stat-label">{s.lbl}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="contact-list-section">
+                        {contactLoading ? <div className="loading">Loading messages...</div> : contactError ? <div className="error">{contactError}</div> : contactMessages.length === 0 ? (
+                            <div className="contact-empty">No {contactFilter || ''} messages found</div>
+                        ) : (
+                            <div className="contact-list">
+                                {contactMessages.map(msg => (
+                                    <div key={msg.id} className={`contact-card contact-card-${msg.status}`}>
+                                        <div className="contact-card-top">
+                                            <div className="contact-sender">
+                                                <span className={`contact-dot dot-${msg.status}`} />
+                                                <span className="contact-sender-name">{msg.sender?.name || 'Unknown'}</span>
+                                                <span className="contact-sender-email">{msg.sender?.email}</span>
+                                                {msg.sender?.is_shop_owner && <span className="contact-tag tag-shop">Shop Owner</span>}
+                                                {msg.sender?.premium_type === 'premier' && <span className="contact-tag tag-premier">Premier</span>}
+                                            </div>
+                                            <div className="contact-card-right">
+                                                <span className="contact-date">{formatDate(msg.createdAt || msg.created_at)}</span>
+                                                <span className={`contact-status-label status-${msg.status}`}>{msg.status}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="contact-card-body">
+                                            <div className="contact-subject-line">
+                                                <span className="contact-subject">{msg.subject}</span>
+                                                {msg.category && <span className="contact-category">{msg.category}</span>}
+                                            </div>
+                                            <p className="contact-message">{msg.message}</p>
+
+                                            {msg.photos && msg.photos.length > 0 && (
+                                                <div className="contact-photos-grid">
+                                                    {msg.photos.map((photo, idx) => (
+                                                        <img key={idx} src={photo} alt={`Attachment ${idx + 1}`} className="contact-photo-thumb" onClick={() => window.open(photo, '_blank')} />
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {msg.admin_reply && (
+                                                <div className="contact-reply-block">
+                                                    <div className="contact-reply-header">Admin Reply</div>
+                                                    <p>{msg.admin_reply}</p>
+                                                    {msg.replied_at && <span className="contact-reply-date">{formatDate(msg.replied_at)}</span>}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="contact-actions">
+                                            {msg.status === 'unread' && <button className="contact-btn btn-read" onClick={() => handleMarkRead(msg.id)}>Mark Read</button>}
+                                            {msg.status !== 'replied' && <button className="contact-btn btn-reply" onClick={() => { setReplyModal({ show: true, message: msg }); setReplyText('') }}>Reply</button>}
+                                            <button className="contact-btn btn-delete" onClick={() => setDeleteContactModal({ show: true, message: msg })}>Delete</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </>)}
+
             </div></div>
+
+            {/* Reject Request Modal */}
+            {rejectModal.show && <div className="modal-overlay" onClick={() => setRejectModal({ show: false, request: null })}><div className="modal" onClick={e => e.stopPropagation()}>
+                <h3>❌ Reject Request</h3>
+                <p>Reject shop owner request from <strong>{rejectModal.request?.user?.name || rejectModal.request?.user?.email}</strong> for <strong>{rejectModal.request?.shop_name}</strong>?</p>
+                <div className="form-group" style={{ margin: '16px 0' }}><label>Reason (optional)</label><textarea value={rejectNote} onChange={e => setRejectNote(e.target.value)} placeholder="Enter reason for rejection..." rows="3" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px' }} /></div>
+                <div className="modal-actions"><button type="button" onClick={() => setRejectModal({ show: false, request: null })} className="btn-cancel">Cancel</button><button onClick={handleRejectRequest} className="btn-confirm-delete" disabled={requestActionLoading}>{requestActionLoading ? 'Rejecting...' : 'Reject Request'}</button></div>
+            </div></div>}
 
             {/* Delete Modals */}
             {/* Admin Password Confirmation Modal */}
-            {adminPwModal.show && <div className="modal-overlay" onClick={() => setAdminPwModal({ show: false, user: null })}><div className="modal" onClick={e => e.stopPropagation()}>
-                <h3>🔒 Confirm Admin Password</h3>
-                <p>{adminPwModal.user?.is_admin ? 'Remove admin from' : 'Grant admin to'} <strong>{adminPwModal.user?.email}</strong></p>
-                <p style={{ color: '#888', fontSize: '13px' }}>Enter your admin password to confirm this action.</p>
-                <form onSubmit={toggleAdmin}>
-                    <div className="form-group" style={{ margin: '16px 0' }}><input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Enter your password" required autoFocus style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px' }} /></div>
-                    <div className="modal-actions"><button type="button" onClick={() => setAdminPwModal({ show: false, user: null })} className="btn-cancel">Cancel</button><button type="submit" className="btn-save" disabled={adminToggleSaving}>{adminToggleSaving ? 'Confirming...' : 'Confirm'}</button></div>
-                </form>
-            </div></div>}
+            {adminPwModal.show && (
+                <div className="modal-overlay" onClick={() => setAdminPwModal({ show: false, user: null })}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <h3>Confirm Admin Action</h3>
+                        <p>{adminPwModal.user?.is_admin ? 'Remove admin from' : 'Grant admin to'} <strong>{adminPwModal.user?.email}</strong></p>
+                        <p className="modal-hint">Enter your admin password to confirm.</p>
+                        <form onSubmit={toggleAdmin}>
+                            <div className="form-group modal-field">
+                                <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Your password" required autoFocus className="modal-input" />
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" onClick={() => setAdminPwModal({ show: false, user: null })} className="btn-cancel">Cancel</button>
+                                <button type="submit" className="btn-save" disabled={adminToggleSaving}>{adminToggleSaving ? 'Confirming...' : 'Confirm'}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Reset Password Modal */}
-            {resetPwModal.show && <div className="modal-overlay" onClick={() => setResetPwModal({ show: false, user: null })}><div className="modal" onClick={e => e.stopPropagation()}>
-                <h3>🔑 Reset Password</h3>
-                <p>Set a new password for <strong>{resetPwModal.user?.email}</strong></p>
-                <form onSubmit={resetUserPassword}>
-                    <div className="form-group" style={{ margin: '16px 0' }}><label>New Password</label><input type="text" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Enter new password (min 6 chars)" minLength="6" required autoFocus style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px' }} /></div>
-                    <div className="modal-actions"><button type="button" onClick={() => setResetPwModal({ show: false, user: null })} className="btn-cancel">Cancel</button><button type="submit" className="btn-save" disabled={resetSaving}>{resetSaving ? 'Resetting...' : 'Reset Password'}</button></div>
-                </form>
-            </div></div>}
+            {resetPwModal.show && (
+                <div className="modal-overlay" onClick={() => setResetPwModal({ show: false, user: null })}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <h3>Reset Password</h3>
+                        <p>Set a new password for <strong>{resetPwModal.user?.email}</strong></p>
+                        <form onSubmit={resetUserPassword}>
+                            <div className="form-group modal-field">
+                                <label>New Password</label>
+                                <input type="text" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min 6 characters" minLength="6" required autoFocus className="modal-input" />
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" onClick={() => setResetPwModal({ show: false, user: null })} className="btn-cancel">Cancel</button>
+                                <button type="submit" className="btn-save" disabled={resetSaving}>{resetSaving ? 'Resetting...' : 'Reset Password'}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {deleteModal.show && <div className="modal-overlay" onClick={() => setDeleteModal({ show: false, user: null })}><div className="modal" onClick={e => e.stopPropagation()}><h3>Confirm Delete</h3><p>Are you sure you want to delete user <strong>{deleteModal.user?.email}</strong>?</p><p className="warning">This action cannot be undone.</p><div className="modal-actions"><button onClick={() => setDeleteModal({ show: false, user: null })} className="btn-cancel">Cancel</button><button onClick={deleteUser} className="btn-confirm-delete">Delete User</button></div></div></div>}
             {deleteBlogModal.show && <div className="modal-overlay" onClick={() => setDeleteBlogModal({ show: false, blog: null })}><div className="modal" onClick={e => e.stopPropagation()}><h3>Confirm Delete</h3><p>Are you sure you want to delete blog <strong>{deleteBlogModal.blog?.title}</strong>?</p><p className="warning">This action cannot be undone.</p><div className="modal-actions"><button onClick={() => setDeleteBlogModal({ show: false, blog: null })} className="btn-cancel">Cancel</button><button onClick={deleteBlog} className="btn-confirm-delete">Delete Blog</button></div></div></div>}
@@ -534,6 +893,43 @@ export default function AdminDashboard() {
                     <div className="form-actions"><button type="button" onClick={() => setBlogFormModal({ show: false, blog: null })} className="btn-cancel">Cancel</button><button type="submit" className="btn-save" disabled={blogSaving}>{blogSaving ? 'Saving...' : 'Save Blog'}</button></div>
                 </form>
             </div></div>}
+
+            {/* Reply to Contact Modal */}
+            {replyModal.show && (
+                <div className="modal-overlay" onClick={() => setReplyModal({ show: false, message: null })}>
+                    <div className="modal contact-reply-modal" onClick={e => e.stopPropagation()}>
+                        <h3>Reply to Message</h3>
+                        <p className="reply-modal-to">To: <strong>{replyModal.message?.sender?.name || replyModal.message?.sender?.email}</strong></p>
+                        <div className="reply-modal-original">
+                            <div className="reply-modal-subject">{replyModal.message?.subject}</div>
+                            <div className="reply-modal-body">{replyModal.message?.message}</div>
+                        </div>
+                        <div className="form-group reply-modal-input">
+                            <label>Your Reply</label>
+                            <textarea value={replyText} onChange={e => setReplyText(e.target.value)} placeholder="Type your reply..." rows="4" required />
+                        </div>
+                        <div className="modal-actions">
+                            <button type="button" onClick={() => setReplyModal({ show: false, message: null })} className="btn-cancel">Cancel</button>
+                            <button onClick={handleReply} className="btn-save" disabled={replySaving || !replyText.trim()}>{replySaving ? 'Sending...' : 'Send Reply'}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Contact Message Modal */}
+            {deleteContactModal.show && (
+                <div className="modal-overlay" onClick={() => setDeleteContactModal({ show: false, message: null })}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <h3>Delete Message</h3>
+                        <p>Delete message from <strong>{deleteContactModal.message?.sender?.name || deleteContactModal.message?.sender?.email}</strong>?</p>
+                        <p className="warning">This action cannot be undone.</p>
+                        <div className="modal-actions">
+                            <button onClick={() => setDeleteContactModal({ show: false, message: null })} className="btn-cancel">Cancel</button>
+                            <button onClick={handleDeleteContact} className="btn-confirm-delete">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

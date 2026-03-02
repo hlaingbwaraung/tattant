@@ -10,7 +10,7 @@
     <div class="auth-container">
       <!-- Left Side - Branding -->
       <div class="auth-branding">
-        <router-link to="/" class="brand-logo">🎌 Suteki</router-link>
+        <router-link to="/" class="brand-logo">🎌 Tattant</router-link>
         <h1 class="brand-title">{{ $t('auth.joinTitle') }}</h1>
         <p class="brand-subtitle">{{ $t('auth.joinSubtitle') }}</p>
         <div class="brand-features">

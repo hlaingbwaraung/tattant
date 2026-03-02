@@ -309,8 +309,8 @@
   font-size: 1.5rem;
   color: var(--text-tertiary);
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -546,16 +546,26 @@
 }
 
 /* Responsive */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .pricing-grid {
     grid-template-columns: 1fr;
   }
 
   .premium-title {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 
   .method-options {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .premium-title {
+    font-size: 1.75rem;
+  }
+  
+  .pricing-card {
+    padding: 1.5rem;
   }
 }

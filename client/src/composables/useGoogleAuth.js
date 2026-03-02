@@ -88,7 +88,7 @@ function ensureInitialized() {
       callback: (response) => credentialCallback?.(response),
       auto_select: false,
       cancel_on_tap_outside: true,
-      use_fedcm_for_prompt: true
+      use_fedcm_for_prompt: false
     })
     isInitialized = true
   }
@@ -142,34 +142,44 @@ export function useGoogleAuth(onSuccess, onError) {
     ensureInitialized()
     googleLoading.value = true
 
-    // Create an invisible container for the Google-rendered button
-    const hiddenContainer = document.createElement('div')
-    hiddenContainer.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;'
-    document.body.appendChild(hiddenContainer)
+    // Try the One Tap / popup prompt first (most reliable)
+    try {
+      window.google.accounts.id.prompt((notification) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // Fallback: render a hidden button and click it
+          const hiddenContainer = document.createElement('div')
+          hiddenContainer.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;'
+          document.body.appendChild(hiddenContainer)
 
-    window.google.accounts.id.renderButton(hiddenContainer, {
-      type: 'standard',
-      size: 'large',
-      text: 'signin_with'
-    })
+          window.google.accounts.id.renderButton(hiddenContainer, {
+            type: 'standard',
+            size: 'large',
+            text: 'signin_with'
+          })
 
-    // Wait for the iframe to render, then simulate a click
-    setTimeout(() => {
-      const clickTarget =
-        hiddenContainer.querySelector('div[role="button"]') ||
-        hiddenContainer.querySelector('iframe') ||
-        hiddenContainer.firstElementChild
-      clickTarget?.click()
+          setTimeout(() => {
+            const clickTarget =
+              hiddenContainer.querySelector('div[role="button"]') ||
+              hiddenContainer.querySelector('iframe') ||
+              hiddenContainer.firstElementChild
+            clickTarget?.click()
 
-      // Clean up the hidden container
-      setTimeout(() => {
-        if (document.body.contains(hiddenContainer)) {
-          document.body.removeChild(hiddenContainer)
+            setTimeout(() => {
+              if (document.body.contains(hiddenContainer)) {
+                document.body.removeChild(hiddenContainer)
+              }
+              setTimeout(() => { googleLoading.value = false }, LOADING_TIMEOUT)
+            }, 500)
+          }, 300)
         }
-        // Safety: reset loading state if nothing happens
-        setTimeout(() => { googleLoading.value = false }, LOADING_TIMEOUT)
-      }, 500)
-    }, 300)
+        if (notification.isDismissedMoment()) {
+          googleLoading.value = false
+        }
+      })
+    } catch {
+      googleLoading.value = false
+      onError?.('Google Sign-In failed to open. Please try again.')
+    }
   }
 
   return {

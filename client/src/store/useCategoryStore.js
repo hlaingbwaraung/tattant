@@ -17,7 +17,9 @@ const useCategoryStore = create((set) => ({
         try {
             set({ loading: true, error: null })
             const response = await getCategories()
-            set({ categories: response.data, loading: false })
+            // API returns { count, categories } — extract the array
+            const data = response.data
+            set({ categories: data.categories ?? data, loading: false })
         } catch (err) {
             set({ error: err.response?.data?.error || 'Failed to fetch categories', loading: false })
             throw err

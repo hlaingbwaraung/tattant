@@ -5,7 +5,7 @@
  * Admin:  getBusinessStats, createBusiness, updateBusiness,
  *         deleteBusiness, toggleBusinessActive
  */
-const { Business, Category, Coupon } = require('../models')
+const { Business, Category, Coupon, User } = require('../models')
 const { Op } = require('sequelize')
 
 // Get all businesses with optional filters
@@ -35,7 +35,8 @@ exports.getAllBusinesses = async (req, res) => {
       where: whereClause,
       include: [
         { model: Category, as: 'category' },
-        { model: Coupon, as: 'coupons', where: { is_active: true }, required: false }
+        { model: Coupon, as: 'coupons', where: { is_active: true }, required: false },
+        { model: User, as: 'owner', attributes: ['id', 'premium_type', 'is_shop_owner'] }
       ],
       order: [['created_at', 'DESC']]
     }
@@ -47,9 +48,16 @@ exports.getAllBusinesses = async (req, res) => {
 
     const businesses = await Business.findAll(queryOptions)
 
+    // Add is_premier flag to each business
+    const result = businesses.map(b => {
+      const json = b.toJSON()
+      json.is_premier = !!(json.owner && json.owner.premium_type === 'premier')
+      return json
+    })
+
     res.json({
-      count: businesses.length,
-      businesses
+      count: result.length,
+      businesses: result
     })
   } catch (error) {
     console.error('Get businesses error:', error)
@@ -65,7 +73,8 @@ exports.getBusinessById = async (req, res) => {
     const business = await Business.findByPk(id, {
       include: [
         { model: Category, as: 'category' },
-        { model: Coupon, as: 'coupons', where: { is_active: true }, required: false }
+        { model: Coupon, as: 'coupons', where: { is_active: true }, required: false },
+        { model: User, as: 'owner', attributes: ['id', 'name', 'premium_type', 'is_shop_owner'] }
       ]
     })
 
@@ -73,7 +82,11 @@ exports.getBusinessById = async (req, res) => {
       return res.status(404).json({ message: 'Business not found' })
     }
 
-    res.json(business)
+    // Add is_premier flag for client convenience
+    const json = business.toJSON()
+    json.is_premier = !!(json.owner && json.owner.premium_type === 'premier')
+
+    res.json(json)
   } catch (error) {
     console.error('Get business error:', error)
     res.status(500).json({ message: 'Server error fetching business' })

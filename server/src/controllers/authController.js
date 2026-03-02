@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
     })
 
     // Generate token
-    const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin, is_shop_owner: user.is_shop_owner, is_premium: user.is_premium }, JWT_SECRET, {
+    const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin, is_shop_owner: user.is_shop_owner, is_premium: user.is_premium, premium_type: user.premium_type || null }, JWT_SECRET, {
       expiresIn: JWT_EXPIRE
     })
 
@@ -87,7 +87,7 @@ exports.login = async (req, res) => {
     }
 
     // Generate token
-    const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin, is_shop_owner: user.is_shop_owner, is_premium: user.is_premium }, JWT_SECRET, {
+    const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin, is_shop_owner: user.is_shop_owner, is_premium: user.is_premium, premium_type: user.premium_type || null }, JWT_SECRET, {
       expiresIn: JWT_EXPIRE
     })
 
@@ -184,7 +184,7 @@ exports.googleAuth = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.id, email: user.email, is_admin: user.is_admin, is_shop_owner: user.is_shop_owner, is_premium: user.is_premium },
+      { id: user.id, email: user.email, is_admin: user.is_admin, is_shop_owner: user.is_shop_owner, is_premium: user.is_premium, premium_type: user.premium_type || null },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRE }
     )

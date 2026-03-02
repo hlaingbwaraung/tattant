@@ -1,7 +1,7 @@
 #!/bin/bash
 # Add 5 more Burmese restaurants to production DB
 
-sudo -u postgres psql -d suteki << 'EOSQL'
+sudo -u postgres psql -d tattant << 'EOSQL'
 
 DO $$
 DECLARE

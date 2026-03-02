@@ -544,7 +544,7 @@
 }
 
 /* Responsive */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .shop-title { font-size: 1.5rem; }
   .balance-card {
     flex-direction: column;

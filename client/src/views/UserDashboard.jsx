@@ -5,11 +5,14 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import { getSavedBusinesses } from '../services/favoriteService'
+import { getMyBookings } from '../services/bookingService'
 import './UserDashboard.css'
 
 export default function UserDashboard() {
     const [userName, setUserName] = useState('')
     const [savedBusinessesCount, setSavedBusinessesCount] = useState(0)
+    const [bookings, setBookings] = useState([])
+    const [loadingBookings, setLoadingBookings] = useState(true)
     const [daysActive] = useState(1)
 
     useEffect(() => {
@@ -18,25 +21,49 @@ export default function UserDashboard() {
         const fetchSaved = async () => {
             try {
                 const response = await getSavedBusinesses()
-                setSavedBusinessesCount(response.data.length)
+                const data = response.data?.data || response.data || []
+                setSavedBusinessesCount(Array.isArray(data) ? data.length : 0)
             } catch (err) { console.error('Error fetching saved businesses:', err) }
         }
+        const fetchBookings = async () => {
+            try {
+                setLoadingBookings(true)
+                const response = await getMyBookings()
+                const data = response.data?.data || response.data || []
+                setBookings(Array.isArray(data) ? data : [])
+            } catch (err) {
+                console.error('Error fetching bookings:', err)
+                setBookings([])
+            } finally {
+                setLoadingBookings(false)
+            }
+        }
         fetchSaved()
+        fetchBookings()
     }, [])
 
-    const stats = [
-        { icon: '❤️', value: savedBusinessesCount, label: 'Saved Places' },
-        { icon: '📍', value: 0, label: 'Places Visited' },
-        { icon: '⭐', value: 0, label: 'Reviews Written' },
-        { icon: '🎯', value: daysActive, label: 'Days Active' },
+    const statActions = [
+        { to: '/favorites', icon: '❤️', value: savedBusinessesCount, label: 'Saved Places', desc: 'Access your saved places' },
+        { to: '/categories', icon: '📍', value: bookings.length, label: 'My Bookings', desc: 'View your booking history' },
+        { to: '/profile/settings', icon: '⚙️', value: 0, label: 'Account Settings', desc: 'Manage your preferences' },
+        { to: '/about-japan', icon: '📚', value: daysActive, label: 'Travel Guides', desc: 'Learn about Japan' },
     ]
 
-    const actions = [
-        { to: '/categories', icon: '🔍', title: 'Explore Categories', desc: 'Browse curated Japan experiences' },
-        { to: '/favorites', icon: '❤️', title: 'View Favorites', desc: 'Access your saved places' },
-        { to: '/profile/settings', icon: '⚙️', title: 'Account Settings', desc: 'Manage your preferences' },
-        { to: '/about-japan', icon: '📚', title: 'Travel Guides', desc: 'Learn about Japan' },
-    ]
+    const getStatusBadge = (status) => {
+        const badges = {
+            pending: 'Pending',
+            confirmed: 'Confirmed',
+            completed: 'Completed',
+            cancelled: 'Cancelled',
+            'no-show': 'No Show'
+        }
+        return badges[status] || status.charAt(0).toUpperCase() + status.slice(1)
+    }
+
+    const formatDate = (dateStr) => {
+        const date = new Date(dateStr)
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    }
 
     return (
         <div className="dashboard-page">
@@ -55,45 +82,78 @@ export default function UserDashboard() {
                     </div>
 
                     <div className="stats-grid">
-                        {stats.map((s, i) => (
-                            <div key={i} className="stat-card">
+                        {statActions.map((s, i) => (
+                            <Link key={i} to={s.to} className="stat-action-card">
                                 <div className="stat-icon-wrapper"><span className="stat-icon">{s.icon}</span></div>
                                 <div className="stat-content">
                                     <div className="stat-number">{s.value}</div>
                                     <div className="stat-label">{s.label}</div>
+                                    <div className="stat-desc">{s.desc}</div>
                                 </div>
-                            </div>
+                                <span className="action-arrow">→</span>
+                            </Link>
                         ))}
                     </div>
 
                     <section className="section">
                         <div className="section-header">
-                            <h2 className="section-title">Quick Actions</h2>
-                            <p className="section-subtitle">Jump to your most used features</p>
+                            <h2 className="section-title">My Bookings</h2>
                         </div>
-                        <div className="actions-grid">
-                            {actions.map(a => (
-                                <Link key={a.to} to={a.to} className="action-card">
-                                    <div className="action-icon">{a.icon}</div>
-                                    <div className="action-content">
-                                        <h3 className="action-title">{a.title}</h3>
-                                        <p className="action-description">{a.desc}</p>
+                        <div className="bookings-list">
+                            {loadingBookings ? (
+                                <div className="loading-state">
+                                    <div className="loading-spinner"></div>
+                                    <p>Loading bookings...</p>
+                                </div>
+                            ) : bookings.length === 0 ? (
+                                <div className="empty-state">
+                                    <span className="empty-icon">📅</span>
+                                    <p className="empty-text">No bookings yet</p>
+                                    <p className="empty-hint">Book your first experience at a Japanese business</p>
+                                    <Link to="/categories" className="btn-primary">Browse Places</Link>
+                                </div>
+                            ) : (
+                                bookings.slice(0, 5).map((booking) => (
+                                    <div key={booking.id} className="booking-item">
+                                        <div className="booking-main">
+                                            <div className="booking-business">
+                                                <h3 className="business-name">{booking.business?.name || 'Business'}</h3>
+                                                {booking.business?.address && (
+                                                    <p className="business-address">📍 {booking.business.address}</p>
+                                                )}
+                                            </div>
+                                            <div className="booking-details">
+                                                <div className="detail-item">
+                                                    <span className="detail-icon">📅</span>
+                                                    <span className="detail-text">{formatDate(booking.booking_date)}</span>
+                                                </div>
+                                                {booking.booking_time && (
+                                                    <div className="detail-item">
+                                                        <span className="detail-icon">🕐</span>
+                                                        <span className="detail-text">{booking.booking_time}</span>
+                                                    </div>
+                                                )}
+                                                {booking.party_size && (
+                                                    <div className="detail-item">
+                                                        <span className="detail-icon">👥</span>
+                                                        <span className="detail-text">{booking.party_size} {booking.party_size === 1 ? 'person' : 'people'}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="booking-status">
+                                            <span className={`status-badge status-${booking.status}`}>
+                                                {getStatusBadge(booking.status)}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <span className="action-arrow">→</span>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section className="section">
-                        <div className="section-header"><h2 className="section-title">Recent Activity</h2></div>
-                        <div className="activity-card">
-                            <div className="activity-empty">
-                                <span className="activity-empty-icon">📋</span>
-                                <p className="activity-empty-text">No recent activity yet</p>
-                                <p className="activity-empty-hint">Start exploring Japan to see your activity here</p>
-                                <Link to="/categories" className="btn-primary">Start Exploring</Link>
-                            </div>
+                                ))
+                            )}
+                            {bookings.length > 5 && (
+                                <div className="view-all-container">
+                                    <p className="view-all-hint">Showing 5 of {bookings.length} bookings</p>
+                                </div>
+                            )}
                         </div>
                     </section>
                 </div>

@@ -23,6 +23,10 @@ const Blog          = require('./Blog')
 const Coupon        = require('./Coupon')
 const QuizScore     = require('./QuizScore')
 const UserCoupon    = require('./UserCoupon')
+const Booking       = require('./Booking')
+const ShopOwnerRequest = require('./ShopOwnerRequest')
+const MenuItem      = require('./MenuItem')
+const ContactMessage = require('./ContactMessage')
 
 /* ============================
  *  Category ↔ Business
@@ -83,6 +87,38 @@ User.hasMany(UserCoupon,     { foreignKey: 'user_id',   as: 'redeemedCoupons' })
 Coupon.hasMany(UserCoupon,   { foreignKey: 'coupon_id', as: 'redemptions' })
 
 /* ============================
+ *  Business → Booking
+ * ============================ */
+Booking.belongsTo(Business, { foreignKey: 'business_id', as: 'business' })
+Business.hasMany(Booking,   { foreignKey: 'business_id', as: 'bookings' })
+
+/* ============================
+ *  User → Booking
+ * ============================ */
+Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
+User.hasMany(Booking,   { foreignKey: 'user_id', as: 'bookings' })
+
+/* ============================
+ *  User → ShopOwnerRequest
+ * ============================ */
+ShopOwnerRequest.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
+User.hasMany(ShopOwnerRequest,   { foreignKey: 'user_id', as: 'shopOwnerRequests' })
+ShopOwnerRequest.belongsTo(User, { foreignKey: 'reviewed_by', as: 'reviewer' })
+
+/* ============================
+ *  Business → MenuItem
+ * ============================ */
+MenuItem.belongsTo(Business, { foreignKey: 'business_id', as: 'business' })
+Business.hasMany(MenuItem,   { foreignKey: 'business_id', as: 'menuItems' })
+
+/* ============================
+ *  User → ContactMessage
+ * ============================ */
+ContactMessage.belongsTo(User, { foreignKey: 'user_id', as: 'sender' })
+User.hasMany(ContactMessage,   { foreignKey: 'user_id', as: 'contactMessages' })
+ContactMessage.belongsTo(User, { foreignKey: 'replied_by', as: 'replier' })
+
+/* ============================
  *  Exports
  * ============================ */
 module.exports = {
@@ -93,5 +129,9 @@ module.exports = {
   Blog,
   Coupon,
   QuizScore,
-  UserCoupon
+  UserCoupon,
+  Booking,
+  ShopOwnerRequest,
+  MenuItem,
+  ContactMessage
 }

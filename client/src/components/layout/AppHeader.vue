@@ -2,7 +2,7 @@
   AppHeader.vue
 
   Global navigation bar shared by all pages.
-    - Logo + main nav links (Home, Explore, About, Learn Japanese, Points Shop)
+    - Logo + main nav links (Home, SHOPS, About, Learn Japanese, Points Shop)
     - Language toggle (EN / MY)
     - Dark / light theme toggle
     - Auth area: login/register buttons or user dropdown menu
@@ -14,7 +14,7 @@
     <div class="header-container">
       <router-link to="/" class="logo">
         <span class="logo-icon">&#127884;</span>
-        <span class="logo-text">Suteki</span>
+        <span class="logo-text">Tattant</span>
       </router-link>
       
       <nav class="nav" :class="{ open: mobileMenuOpen }">

@@ -15,6 +15,8 @@
 const express = require('express')
 const router = express.Router()
 const businessController = require('../controllers/businessController')
+const menuItemController = require('../controllers/menuItemController')
+const bookingController = require('../controllers/bookingController')
 const { authenticate } = require('../middleware/auth')
 
 // Admin stats (before /:id to avoid matching "admin" as id)
@@ -23,6 +25,10 @@ router.get('/admin/stats', authenticate, businessController.getBusinessStats)
 // Public routes
 router.get('/', businessController.getAllBusinesses)
 router.get('/:id', businessController.getBusinessById)
+router.get('/:businessId/menu', menuItemController.getPublicMenu)
+
+// Public booking (authenticated users)
+router.post('/:id/book', authenticate, bookingController.createPublicBooking)
 
 // Admin write routes
 router.post('/', authenticate, businessController.createBusiness)

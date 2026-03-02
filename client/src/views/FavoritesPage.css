@@ -86,7 +86,7 @@
   display: inline-block;
   padding: 1rem 2.5rem;
   background: var(--color-primary-gradient);
-  color: #1a1a2e;
+  color: #0c0c14;
   text-decoration: none;
   border-radius: var(--radius-sm);
   font-weight: 700;
@@ -217,8 +217,8 @@
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: 50%;

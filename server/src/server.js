@@ -26,8 +26,8 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }
 }))                                               // HTTP security headers
-app.use(express.json())                           // Parse JSON request bodies
-app.use(express.urlencoded({ extended: true }))   // Parse URL-encoded bodies
+app.use(express.json({ limit: '25mb' }))          // Parse JSON request bodies (25mb for photo uploads)
+app.use(express.urlencoded({ extended: true, limit: '25mb' }))   // Parse URL-encoded bodies
 
 /* ========================================
  *  2. CORS – allowed front-end origins
@@ -39,7 +39,6 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175',
-  'https://hlaingbwaraung.github.io',
   'https://tattant.com',
   'https://www.tattant.com',
   process.env.FRONTEND_URL
@@ -51,10 +50,10 @@ app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }))
  *  3. Rate Limiting
  * ======================================== */
 
-// General API limiter – 100 requests per 15 min
+// General API limiter – relaxed in dev, strict in prod
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100,
   message: 'Too many requests from this IP, please try again later.'
 })
 
@@ -87,9 +86,13 @@ app.use('/api/admin', require('./routes/adminRoutes'))
 app.use('/api/blogs', require('./routes/blogRoutes'))
 app.use('/api/coupons', require('./routes/couponRoutes'))
 app.use('/api/shop-owner', require('./routes/shopOwnerRoutes'))
+app.use('/api/shop-owner-requests', require('./routes/shopOwnerRequestRoutes'))
 app.use('/api/quiz', require('./routes/quizRoutes'))
 app.use('/api/points', require('./routes/pointsRoutes'))
 app.use('/api/dictionary', require('./routes/dictionaryRoutes'))
+app.use('/api/bookings', require('./routes/bookingRoutes'))
+app.use('/api/chat', require('./routes/chatRoutes'))
+app.use('/api/contact', require('./routes/contactRoutes'))
 
 /* ========================================
  *  6. Error Handling

@@ -34,4 +34,12 @@ router.patch('/users/:userId/password', adminController.resetUserPassword)
 // Delete user
 router.delete('/users/:userId', adminController.deleteUser)
 
+// Shop owner management
+router.patch('/users/:userId/shop-owner', adminController.toggleShopOwner)
+router.post('/shop-owners', adminController.createShopOwner)
+router.patch('/users/:userId/assign-business', adminController.assignBusiness)
+
+// Premier Shop Owner – grants full booking system access
+router.patch('/users/:userId/premier-owner', adminController.togglePremierOwner)
+
 module.exports = router

@@ -4,7 +4,7 @@
  * All operations require an authenticated user (req.user).
  * Exports: saveBusiness, unsaveBusiness, getSavedBusinesses, checkIfSaved
  */
-const { SavedBusiness, Business, Category } = require('../models')
+const { SavedBusiness, Business, Category, User } = require('../models')
 
 // Save a business to favorites
 exports.saveBusiness = async (req, res) => {
@@ -79,17 +79,19 @@ exports.getSavedBusinesses = async (req, res) => {
           model: Business,
           as: 'business',
           include: [
-            {
-              model: Category,
-              as: 'category'
-            }
+            { model: Category, as: 'category' },
+            { model: User, as: 'owner', attributes: ['id', 'premium_type', 'is_shop_owner'] }
           ]
         }
       ],
       order: [['created_at', 'DESC']]
     })
 
-    const businesses = savedBusinesses.map(sb => sb.business)
+    const businesses = savedBusinesses.map(sb => {
+      const json = sb.business.toJSON()
+      json.is_premier = !!(json.owner && json.owner.premium_type === 'premier')
+      return json
+    })
 
     res.json(businesses)
   } catch (error) {

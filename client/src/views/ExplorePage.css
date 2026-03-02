@@ -24,7 +24,7 @@
 .explore-hero-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 30% 50%, rgba(201, 169, 98, 0.12) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 30% 50%, rgba(184, 134, 11, 0.12) 0%, transparent 60%);
 }
 
 .explore-hero-content {
@@ -35,22 +35,25 @@
 
 .explore-badge {
   display: inline-block;
-  padding: 0.5rem 1.25rem;
-  background: rgba(201, 169, 98, 0.15);
-  border: 1px solid rgba(201, 169, 98, 0.3);
+  padding: 0.5rem 1.5rem;
+  background: rgba(184, 134, 11, 0.12);
+  border: 1px solid rgba(184, 134, 11, 0.35);
   border-radius: var(--radius-full);
   color: var(--color-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   margin-bottom: 1.5rem;
+  backdrop-filter: blur(8px);
 }
 
 .explore-hero-title {
+  font-family: var(--font-display);
   font-size: 3rem;
   color: #ffffff;
-  font-weight: 800;
-  line-height: 1.2;
+  font-weight: 700;
+  line-height: 1.15;
   margin-bottom: 1rem;
 }
 
@@ -124,7 +127,7 @@
 /* Categories Grid */
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 1.25rem;
   margin-bottom: 4rem;
 }
@@ -139,12 +142,26 @@
   border-radius: var(--radius-lg);
   text-decoration: none;
   transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+.category-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--color-primary-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-base);
 }
 
 .category-card:hover {
   border-color: var(--color-primary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+  transform: translateY(-2px);
+}
+.category-card:hover::before {
+  opacity: 1;
 }
 
 .category-card-icon {
@@ -165,6 +182,7 @@
 }
 
 .category-card-name {
+  font-family: var(--font-display);
   font-size: 1.0625rem;
   color: var(--text-primary);
   font-weight: 700;
@@ -194,7 +212,7 @@
 
 .businesses-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
   gap: 1.5rem;
 }
 
@@ -205,12 +223,25 @@
   overflow: hidden;
   text-decoration: none;
   transition: all var(--transition-base);
+  position: relative;
+}
+.business-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--color-primary-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-base);
 }
 
 .business-card:hover {
   border-color: var(--color-primary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+  transform: translateY(-3px);
+}
+.business-card:hover::after {
+  opacity: 1;
 }
 
 .card-image {
@@ -248,6 +279,7 @@
 }
 
 .business-name {
+  font-family: var(--font-display);
   font-size: 1.125rem;
   color: var(--text-primary);
   margin-bottom: 0.5rem;

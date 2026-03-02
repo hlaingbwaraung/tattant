@@ -1,7 +1,7 @@
 #!/bin/bash
-echo "=== Updating Burmese translations in suteki database ==="
+echo "=== Updating Burmese translations in tattant database ==="
 
-sudo -u postgres psql -d suteki <<'EOSQL'
+sudo -u postgres psql -d tattant <<'EOSQL'
 
 -- Update category Burmese names
 UPDATE categories SET name_my = 'SIM ကတ်နှင့် အင်တာနက်' WHERE slug = 'sim-cards';
@@ -30,11 +30,11 @@ EOSQL
 
 echo ""
 echo "=== Verifying category updates ==="
-sudo -u postgres psql -d suteki -c "SELECT slug, name_my FROM categories ORDER BY display_order;"
+sudo -u postgres psql -d tattant -c "SELECT slug, name_my FROM categories ORDER BY display_order;"
 
 echo ""
 echo "=== Verifying business updates ==="
-sudo -u postgres psql -d suteki -c "SELECT name, LEFT(description_my, 80) as burmese_preview FROM businesses ORDER BY name;"
+sudo -u postgres psql -d tattant -c "SELECT name, LEFT(description_my, 80) as burmese_preview FROM businesses ORDER BY name;"
 
 echo ""
 echo "=== All Burmese translations updated! ==="
