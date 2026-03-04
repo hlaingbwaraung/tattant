@@ -27,6 +27,7 @@ const Booking       = require('./Booking')
 const ShopOwnerRequest = require('./ShopOwnerRequest')
 const MenuItem      = require('./MenuItem')
 const ContactMessage = require('./ContactMessage')
+const SiteVisit     = require('./SiteVisit')
 
 /* ============================
  *  Category ↔ Business
@@ -121,6 +122,15 @@ ContactMessage.belongsTo(User, { foreignKey: 'replied_by', as: 'replier' })
 /* ============================
  *  Exports
  * ============================ */
+/* ============================
+ *  User → SiteVisit
+ * ============================ */
+SiteVisit.belongsTo(User, { foreignKey: 'user_id', as: 'visitor' })
+User.hasMany(SiteVisit,   { foreignKey: 'user_id', as: 'siteVisits' })
+
+/* ============================
+ *  Exports
+ * ============================ */
 module.exports = {
   User,
   Category,
@@ -133,5 +143,6 @@ module.exports = {
   Booking,
   ShopOwnerRequest,
   MenuItem,
-  ContactMessage
+  ContactMessage,
+  SiteVisit
 }

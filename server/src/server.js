@@ -5,11 +5,12 @@
  * registers all API route modules, and starts the HTTP server.
  */
 
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
-require('dotenv').config()
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') })
 
 const { testConnection } = require('./config/database')
 
@@ -93,6 +94,7 @@ app.use('/api/dictionary', require('./routes/dictionaryRoutes'))
 app.use('/api/bookings', require('./routes/bookingRoutes'))
 app.use('/api/chat', require('./routes/chatRoutes'))
 app.use('/api/contact', require('./routes/contactRoutes'))
+app.use('/api/visits', require('./routes/visitRoutes'))
 
 /* ========================================
  *  6. Error Handling

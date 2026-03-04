@@ -43,6 +43,24 @@ exports.requireAdmin = (req, res, next) => {
 }
 
 /**
+ * Middleware: optionally authenticate.
+ * If a valid JWT is present, populates req.user. Otherwise continues without error.
+ */
+exports.optionalAuth = (req, _res, next) => {
+  try {
+    const authHeader = req.headers.authorization
+    const token = authHeader?.split(' ')[1]
+    if (token) {
+      req.user = jwt.verify(token, JWT_SECRET)
+    }
+  } catch (_error) {
+    // Token invalid or expired – treat as anonymous
+    req.user = null
+  }
+  next()
+}
+
+/**
  * Middleware: require shop-owner privileges.
  * Must be used after `authenticate`.
  */

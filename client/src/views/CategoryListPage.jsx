@@ -1,17 +1,65 @@
 /**
  * CategoryListPage – Displays businesses filtered by category slug.
+ * For job categories (jobs-fulltime / jobs-parttime), shows static job listings.
  */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import api from '../services/api'
 import AppHeader from '../components/layout/AppHeader'
 import './CategoryListPage.css'
 
+/* ─── Static job data ─────────────────────────────────────────────────────── */
+
+const FULLTIME_JOBS = [
+    { id: 'ft-1', title: 'Software Engineer (Full-Stack)', company: 'SoftBank Corp', location: 'Shibuya, Tokyo', salary: '¥450,000 – ¥600,000 / month', type: 'Full-time', tags: ['React', 'Node.js', 'TypeScript'], urgent: false, logo: '💻', posted: '2 days ago', description: 'Build and maintain web applications for millions of users across Japan. Strong knowledge of modern JavaScript frameworks required.' },
+    { id: 'ft-2', title: 'English Teacher (ALT)', company: 'Interac Co., Ltd.', location: 'Yokohama, Kanagawa', salary: '¥250,000 – ¥280,000 / month', type: 'Full-time', tags: ['English', 'Teaching', 'TESOL'], urgent: true, logo: '🎓', posted: '1 day ago', description: 'Assist Japanese teachers of English at public elementary and middle schools. No Japanese language skill required.' },
+    { id: 'ft-3', title: 'Bilingual IT Support Specialist', company: 'Fujitsu Limited', location: 'Kawasaki, Kanagawa', salary: '¥320,000 – ¥400,000 / month', type: 'Full-time', tags: ['IT Support', 'English', 'Japanese N3+'], urgent: false, logo: '🖥️', posted: '3 days ago', description: 'Provide helpdesk support and system administration for internal and external clients across the Asia-Pacific region.' },
+    { id: 'ft-4', title: 'Hotel Front Desk Staff (Night Shift)', company: 'APA Hotel Group', location: 'Shinjuku, Tokyo', salary: '¥230,000 – ¥270,000 / month', type: 'Full-time', tags: ['Hospitality', 'English', 'Customer Service'], urgent: true, logo: '🏨', posted: '5 hours ago', description: 'Welcome international guests, handle check-ins/check-outs, and coordinate with housekeeping. Night shift allowance included.' },
+    { id: 'ft-5', title: 'Marketing Coordinator (Global)', company: 'Rakuten, Inc.', location: 'Setagaya, Tokyo', salary: '¥380,000 – ¥500,000 / month', type: 'Full-time', tags: ['Marketing', 'English', 'SNS'], urgent: false, logo: '📣', posted: '1 week ago', description: "Drive global marketing campaigns for Rakuten's e-commerce platform. Work with international teams across Europe and Asia." },
+    { id: 'ft-6', title: 'Registered Nurse (Intl License)', company: 'Tokyo Medical Center', location: 'Meguro, Tokyo', salary: '¥350,000 – ¥420,000 / month', type: 'Full-time', tags: ['Nursing', 'JLPT N2', 'Healthcare'], urgent: true, logo: '🏥', posted: '2 days ago', description: 'Provide patient care in a busy metropolitan hospital. International nursing license recognition supported. Japanese N2 preferred.' },
+    { id: 'ft-7', title: 'Restaurant Manager (Burmese Cuisine)', company: 'Yoma Kitchen Tokyo', location: 'Shin-Okubo, Tokyo', salary: '¥280,000 – ¥340,000 / month', type: 'Full-time', tags: ['Restaurant', 'Management', 'Burmese'], urgent: false, logo: '🍛', posted: '4 days ago', description: 'Oversee daily operations of a popular Burmese restaurant including staff management, food safety compliance, and customer service.' },
+    { id: 'ft-8', title: 'Logistics Coordinator', company: 'Nippon Express', location: 'Koto, Tokyo', salary: '¥290,000 – ¥360,000 / month', type: 'Full-time', tags: ['Logistics', 'Forklift License', 'English'], urgent: false, logo: '🚚', posted: '3 days ago', description: 'Coordinate international freight shipments, manage customs documentation, and liaise with overseas partners.' },
+    { id: 'ft-9', title: 'Financial Analyst', company: 'MUFG Bank', location: 'Chiyoda, Tokyo', salary: '¥500,000 – ¥700,000 / month', type: 'Full-time', tags: ['Finance', 'Excel', 'CFA preferred'], urgent: false, logo: '💹', posted: '6 days ago', description: 'Analyze financial data and prepare reports for senior management. MBA or CFA certification preferred. English required.' },
+    { id: 'ft-10', title: 'Real Estate Agent (Expat Specialist)', company: 'Global Homes Japan', location: 'Minato, Tokyo', salary: '¥300,000 – ¥550,000 / month (+ commission)', type: 'Full-time', tags: ['Real Estate', 'English', 'Sales'], urgent: false, logo: '🏠', posted: '5 days ago', description: 'Help expats find apartments and homes across Tokyo. Strong English skills and knowledge of Japanese tenancy laws required.' },
+    { id: 'ft-11', title: 'Warehouse Supervisor', company: 'Amazon Japan', location: 'Ichikawa, Chiba', salary: '¥310,000 – ¥390,000 / month', type: 'Full-time', tags: ['Warehouse', 'Team Lead', 'WMS'], urgent: true, logo: '📦', posted: '1 day ago', description: 'Supervise a team of 20+ warehouse associates, ensuring accurate order processing and adherence to safety standards.' },
+    { id: 'ft-12', title: 'Interpreter / Translator (EN–MY–JP)', company: 'Freelance via TTM Agency', location: 'Remote / Tokyo hybrid', salary: '¥350,000 – ¥480,000 / month', type: 'Full-time', tags: ['Interpretation', 'Burmese', 'English', 'Japanese'], urgent: false, logo: '🌐', posted: '1 week ago', description: 'Provide simultaneous and consecutive interpretation for business meetings, legal proceedings, and medical consultations.' },
+]
+
+const PARTTIME_JOBS = [
+    { id: 'pt-1', title: 'Convenience Store Staff (キャッシャー)', company: 'FamilyMart', location: 'Shibuya, Tokyo', salary: '¥1,113 – ¥1,200 / hr', type: 'Part-time', tags: ['No Japanese required', 'Night OK', 'Weekly pay'], urgent: true, logo: '🏪', posted: '1 day ago', description: 'Cashier duties, stocking shelves, and light cleaning. Morning and night shifts available. Training provided for foreign nationals.' },
+    { id: 'pt-2', title: 'Restaurant Server (English-speaking)', company: 'TGI Fridays Japan', location: 'Roppongi, Tokyo', salary: '¥1,200 – ¥1,400 / hr', type: 'Part-time', tags: ['English OK', 'Tips', 'Flexible hours'], urgent: false, logo: '🍔', posted: '2 days ago', description: 'Serve food and drinks to international guests in a lively atmosphere. English fluency required. Weekend shifts preferred.' },
+    { id: 'pt-3', title: 'Food Delivery Rider', company: 'Uber Eats Japan', location: 'Tokyo (Multiple Areas)', salary: '¥1,500 – ¥2,500 / hr (earnings vary)', type: 'Part-time', tags: ['Bike / Bicycle', 'Flexible', 'Cash weekly'], urgent: false, logo: '🛵', posted: 'just now', description: 'Deliver meals on your own schedule. Own a bicycle or scooter? Register now and start earning immediately. No Japanese required.' },
+    { id: 'pt-4', title: 'English / Burmese Tutor (Online)', company: 'Self-employed via HelloTalk', location: 'Remote', salary: '¥1,500 – ¥3,000 / hr', type: 'Part-time', tags: ['Teaching', 'Online', 'Flexible'], urgent: false, logo: '📚', posted: '3 days ago', description: 'Tutor Japanese students in English or help Burmese expats learn Japanese. Set your own schedule. All levels welcome.' },
+    { id: 'pt-5', title: 'Factory Line Worker (Afternoon Shift)', company: 'Toyota Boshoku', location: 'Ohbu, Aichi', salary: '¥1,050 – ¥1,250 / hr', type: 'Part-time', tags: ['No experience', 'Transportation paid', 'Dormitory available'], urgent: true, logo: '🏭', posted: '5 hours ago', description: 'Assemble automotive parts on a production line. Afternoon/evening shifts available. Dormitory housing offered for remote applicants.' },
+    { id: 'pt-6', title: 'Hotel Housekeeping Staff', company: 'Dormy Inn Chain', location: 'Sapporo, Hokkaido', salary: '¥1,000 – ¥1,150 / hr', type: 'Part-time', tags: ['Morning shift', 'No Japanese required', 'Uniform provided'], urgent: false, logo: '🏨', posted: '4 days ago', description: 'Clean and prepare guest rooms to hotel standards. Morning shifts 8am–2pm. Beginner-friendly with full training provided.' },
+    { id: 'pt-7', title: 'Event Crew / Venue Staff', company: 'Staff Service Holdings', location: 'Osaka & Kobe area', salary: '¥1,200 – ¥1,600 / hr', type: 'Part-time', tags: ['Weekends', 'Events', 'Physical work'], urgent: false, logo: '🎪', posted: '1 week ago', description: 'Help set up and manage events, concerts, and trade shows across the Kansai region. Weekends and holidays mainly. Fit and energetic.' },
+    { id: 'pt-8', title: 'Customer Service Rep (Phone/Chat)', company: 'Transcosmos Inc.', location: 'Fukuoka (office)', salary: '¥1,150 – ¥1,350 / hr', type: 'Part-time', tags: ['English required', 'Sitting work', 'Training provided'], urgent: false, logo: '📞', posted: '2 days ago', description: 'Handle inbound customer inquiries for a global tech client. English fluency essential. Afternoon/evening shifts, 4–8 hrs per day.' },
+    { id: 'pt-9', title: 'Grocery Store Stocker (Night)', company: 'AEON Group', location: 'Multiple locations', salary: '¥1,100 – ¥1,300 / hr (night premium)', type: 'Part-time', tags: ['Night shift', 'Physical work', 'Weekly pay'], urgent: true, logo: '🛒', posted: '6 hours ago', description: 'Stock shelves and organise produce sections overnight. No Japanese language required. Night shift premium pay included.' },
+    { id: 'pt-10', title: 'Café Barista / Counter Staff', company: 'Doutor Coffee', location: 'Shibuya, Tokyo', salary: '¥1,050 – ¥1,200 / hr', type: 'Part-time', tags: ['Coffee', 'Customer-facing', 'Student OK'], urgent: false, logo: '☕', posted: '3 days ago', description: 'Prepare beverages and serve customers in a busy city centre café. Friendly personality and basic Japanese greeting skills helpful.' },
+    { id: 'pt-11', title: 'Cleaning / Janitorial Staff', company: 'ISS Facility Services Japan', location: 'Yokohama, Kanagawa', salary: '¥1,000 – ¥1,100 / hr', type: 'Part-time', tags: ['Early morning', 'No experience', 'Stable hours'], urgent: false, logo: '🧹', posted: '5 days ago', description: 'Maintain cleanliness of office buildings and commercial facilities. Early morning shifts 5am–9am. Reliable schedule, perfect as a second job.' },
+    { id: 'pt-12', title: 'Interpreter Assistant (Burmese)', company: 'Medical Interpreter Network Japan', location: 'Tokyo / Remote', salary: '¥1,500 – ¥2,200 / hr', type: 'Part-time', tags: ['Burmese', 'Medical', 'Flexible'], urgent: true, logo: '🌐', posted: '1 day ago', description: 'Assist Burmese-speaking patients communicate with Japanese medical staff. Freelance basis. Medical terminology training provided.' },
+]
+
+function seededShuffle(arr, seed) {
+    const a = [...arr]
+    let s = seed
+    for (let i = a.length - 1; i > 0; i--) {
+        s = (s * 1664525 + 1013904223) & 0xffffffff
+        const j = Math.abs(s) % (i + 1);
+        [a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+}
+
+/* ─── Component ───────────────────────────────────────────────────────────── */
+
 export default function CategoryListPage() {
     const { slug } = useParams()
     const { t, i18n } = useTranslation()
     const currentLocale = i18n.language
+
+    const isJobPage = slug === 'jobs-fulltime' || slug === 'jobs-parttime'
 
     const [businesses, setBusinesses] = useState([])
     const [loading, setLoading] = useState(true)
@@ -23,9 +71,18 @@ export default function CategoryListPage() {
         'real-estate': { name: t('category.realEstate'), icon: '🏠', description: t('category.realEstateDesc') },
         'book-stores': { name: t('category.bookstores'), icon: '📚', description: t('category.bookstoresDesc') },
         'currency-exchange': { name: t('category.currencyExchange'), icon: '💱', description: t('category.currencyExchangeDesc') },
+        'jobs-fulltime': { name: t('category.jobsFulltime'), icon: '💼', description: t('category.jobsFulltimeDesc') },
+        'jobs-parttime': { name: t('category.jobsParttime'), icon: '🕐', description: t('category.jobsParttimeDesc') },
     }
 
     const category = categoryMap[slug] || { name: slug, icon: '📂', description: '' }
+
+    // Randomised but stable for this page session
+    const jobListings = useMemo(() => {
+        const seed = Date.now() % 100000
+        const pool = slug === 'jobs-fulltime' ? FULLTIME_JOBS : PARTTIME_JOBS
+        return seededShuffle(pool, seed)
+    }, [slug])
 
     useEffect(() => {
         document.title = `${category.name} | Tattant`
@@ -33,6 +90,7 @@ export default function CategoryListPage() {
     }, [slug, category.name])
 
     useEffect(() => {
+        if (isJobPage) { setLoading(false); return }
         const fetchData = async () => {
             setLoading(true)
             setError('')
@@ -47,7 +105,7 @@ export default function CategoryListPage() {
             }
         }
         fetchData()
-    }, [slug])
+    }, [slug, isJobPage])
 
     return (
         <div className="category-list-page">
@@ -82,6 +140,40 @@ export default function CategoryListPage() {
                             <div className="error-icon">⚠️</div>
                             <p className="error">{error}</p>
                             <Link to="/" className="back-btn">{t('auth.backToHome')}</Link>
+                        </div>
+                    ) : isJobPage ? (
+                        /* ── Job listings view ── */
+                        <div>
+                            <div className="job-list-meta">
+                                <p className="results-count">{jobListings.length} jobs found</p>
+                                <span className="job-demo-badge">📋 Sample Listings</span>
+                            </div>
+                            <div className="job-listings-grid">
+                                {jobListings.map(job => (
+                                    <div key={job.id} className="job-card">
+                                        <div className="job-card-header">
+                                            <span className="job-logo">{job.logo}</span>
+                                            <div className="job-header-info">
+                                                <h3 className="job-title">{job.title}</h3>
+                                                <span className="job-company">{job.company}</span>
+                                            </div>
+                                            {job.urgent && <span className="job-urgent-badge">🔥 Urgent</span>}
+                                        </div>
+                                        <p className="job-desc">{job.description}</p>
+                                        <div className="job-meta-row">
+                                            <span className="job-meta-item">📍 {job.location}</span>
+                                            <span className="job-meta-item">💴 {job.salary}</span>
+                                            <span className="job-meta-item">🕐 {job.posted}</span>
+                                        </div>
+                                        <div className="job-tags">
+                                            {job.tags.map(tag => <span key={tag} className="job-tag">{tag}</span>)}
+                                        </div>
+                                        <button className="job-apply-btn" onClick={() => alert('Job applications coming soon! Contact us via the Contact page.')}>
+                                            Apply Now →
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     ) : businesses.length === 0 ? (
                         <div className="empty-state">

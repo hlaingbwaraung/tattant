@@ -6,7 +6,7 @@
  *
  * Every handler checks `req.user.is_admin` before proceeding.
  */
-const { User } = require('../models')
+const { User, Business } = require('../models')
 const bcrypt = require('bcryptjs')
 
 // Get all users (admin only)
@@ -19,6 +19,7 @@ exports.getAllUsers = async (req, res) => {
 
     const users = await User.findAll({
       attributes: ['id', 'email', 'name', 'preferred_language', 'email_verified', 'is_admin', 'is_shop_owner', 'is_premium', 'premium_type', 'premium_expires_at', 'google_id', 'birthdate', 'created_at', 'updated_at'],
+      include: [{ model: Business, as: 'ownedBusinesses', attributes: ['id', 'name'], required: false }],
       order: [['created_at', 'DESC']]
     })
 

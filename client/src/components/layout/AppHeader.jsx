@@ -91,6 +91,30 @@ export default function AppHeader() {
                     {/* Desktop nav links (no icons) */}
                     <Link to="/" className={`nav-link desktop-nav ${isActive('/') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.home')}</Link>
                     <Link to="/explore" className={`nav-link desktop-nav ${isActive('/explore') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.explore')}</Link>
+
+                    {/* Jobs dropdown (desktop) */}
+                    <div className="nav-dropdown desktop-nav">
+                        <button className={`nav-link nav-dropdown-trigger ${location.pathname.startsWith('/categories/jobs') ? 'active' : ''}`}>
+                            {t('category.jobs')} <span className="nav-dropdown-arrow">▾</span>
+                        </button>
+                        <div className="nav-dropdown-menu">
+                            <Link to="/categories/jobs-fulltime" className="nav-dropdown-item" onClick={closeMobile}>
+                                <span className="nav-dropdown-icon">💼</span>
+                                <div>
+                                    <div className="nav-dropdown-label">{t('category.jobsFulltime')}</div>
+                                    <div className="nav-dropdown-desc">{t('category.jobsFulltimeDesc')}</div>
+                                </div>
+                            </Link>
+                            <Link to="/categories/jobs-parttime" className="nav-dropdown-item" onClick={closeMobile}>
+                                <span className="nav-dropdown-icon">🕐</span>
+                                <div>
+                                    <div className="nav-dropdown-label">{t('category.jobsParttime')}</div>
+                                    <div className="nav-dropdown-desc">{t('category.jobsParttimeDesc')}</div>
+                                </div>
+                            </Link>
+                        </div>
+                    </div>
+
                     <Link to="/about-japan" className={`nav-link desktop-nav ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.about')}</Link>
 
                     {/* Mobile drawer content */}
@@ -118,6 +142,18 @@ export default function AppHeader() {
                                 <Link to="/explore" className={`mobile-nav-item ${isActive('/explore') ? 'active' : ''}`} onClick={closeMobile}>
                                     <span className="mobile-nav-icon">🔍</span> {t('nav.explore')}
                                 </Link>
+
+                                {/* Jobs sub-section (mobile) */}
+                                <div className="mobile-nav-group">
+                                    <div className="mobile-nav-group-label"><span className="mobile-nav-icon">💼</span> {t('category.jobs')}</div>
+                                    <Link to="/categories/jobs-fulltime" className={`mobile-nav-item mobile-nav-sub ${isActive('/categories/jobs-fulltime') ? 'active' : ''}`} onClick={closeMobile}>
+                                        <span className="mobile-nav-icon">💼</span> {t('category.jobsFulltime')}
+                                    </Link>
+                                    <Link to="/categories/jobs-parttime" className={`mobile-nav-item mobile-nav-sub ${isActive('/categories/jobs-parttime') ? 'active' : ''}`} onClick={closeMobile}>
+                                        <span className="mobile-nav-icon">🕐</span> {t('category.jobsParttime')}
+                                    </Link>
+                                </div>
+
                                 <Link to="/about-japan" className={`mobile-nav-item ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>
                                     <span className="mobile-nav-icon">🗾</span> {t('nav.about')}
                                 </Link>

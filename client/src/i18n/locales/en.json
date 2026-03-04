@@ -139,7 +139,13 @@
     "bookstores": "Book Stores",
     "bookstoresDesc": "Books, study materials, and rare finds",
     "currencyExchange": "Currency Exchange",
-    "currencyExchangeDesc": "Find the best rates for currency exchange"
+    "currencyExchangeDesc": "Find the best rates for currency exchange",
+    "jobs": "Jobs",
+    "jobsDesc": "Find job opportunities for expats in Japan",
+    "jobsFulltime": "Full-time (正社員)",
+    "jobsFulltimeDesc": "Permanent full-time positions with benefits",
+    "jobsParttime": "Part-time (アルバイト)",
+    "jobsParttimeDesc": "Flexible part-time and hourly work opportunities"
   },
   "explore": {
     "badge": "Explore Local Services",

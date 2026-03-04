@@ -5,8 +5,9 @@
  * In production, SSL is enabled for secure cloud connections.
  */
 
+const path = require('path')
 const { Sequelize } = require('sequelize')
-require('dotenv').config()
+require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') })
 
 const isProduction = process.env.NODE_ENV === 'production'
 

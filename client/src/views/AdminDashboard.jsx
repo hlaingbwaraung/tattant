@@ -99,6 +99,12 @@ export default function AdminDashboard() {
     const [replySaving, setReplySaving] = useState(false)
     const [deleteContactModal, setDeleteContactModal] = useState({ show: false, message: null })
 
+    // Site Analytics
+    const [visitStats, setVisitStats] = useState(null)
+    const [visitLoading, setVisitLoading] = useState(false)
+    const [visitError, setVisitError] = useState('')
+    const [visitDays, setVisitDays] = useState(30)
+
     const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 
     // ========== USER MANAGEMENT ==========
@@ -414,6 +420,18 @@ export default function AdminDashboard() {
 
     useEffect(() => { if (activeTab === 'contacts') loadContacts() }, [activeTab, loadContacts])
 
+    // ========== SITE ANALYTICS ==========
+    const loadVisitStats = useCallback(async () => {
+        try {
+            setVisitLoading(true); setVisitError('')
+            const res = await api.get(`/visits/stats?days=${visitDays}`)
+            setVisitStats(res.data)
+        } catch { setVisitError('Failed to load visit statistics') }
+        finally { setVisitLoading(false) }
+    }, [visitDays])
+
+    useEffect(() => { if (activeTab === 'analytics') loadVisitStats() }, [activeTab, loadVisitStats])
+
     const bf = (field) => (e) => setBlogForm(p => ({ ...p, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
     const cf = (field) => (e) => setCategoryForm(p => ({ ...p, [field]: e.target.type === 'number' ? Number(e.target.value) : e.target.value }))
     const sf = (field) => (e) => setShopForm(p => ({ ...p, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
@@ -441,9 +459,9 @@ export default function AdminDashboard() {
                 <div className="page-header"><h1>👨‍💼 Admin Dashboard</h1><p className="subtitle">Manage Users, Blogs & Statistics</p></div>
 
                 <div className="tab-nav">
-                    {['users', 'blogs', 'categories', 'shops', 'requests', 'contacts'].map(tab => (
+                    {['users', 'blogs', 'categories', 'shops', 'requests', 'contacts', 'analytics'].map(tab => (
                         <button key={tab} className={`tab-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                            {tab === 'users' ? '👥' : tab === 'blogs' ? '📝' : tab === 'categories' ? '📂' : tab === 'shops' ? '🏪' : tab === 'requests' ? '📋' : '📩'} {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab === 'users' ? '👥' : tab === 'blogs' ? '📝' : tab === 'categories' ? '📂' : tab === 'shops' ? '🏪' : tab === 'requests' ? '📋' : tab === 'contacts' ? '📩' : '📊'} {tab.charAt(0).toUpperCase() + tab.slice(1)}
                             {tab === 'requests' && requestCounts.pending > 0 && <span className="badge-count">{requestCounts.pending}</span>}
                             {tab === 'contacts' && contactCounts.unread > 0 && <span className="badge-count">{contactCounts.unread}</span>}
                         </button>
@@ -525,6 +543,7 @@ export default function AdminDashboard() {
                                                 <div className="user-card-name">
                                                     {u.name || 'Unnamed'}
                                                     {u.id === currentUserId && <span className="user-you-tag">You</span>}
+                                                    {u.ownedBusinesses?.length > 0 && <span className="user-shop-name">🏪 {u.ownedBusinesses.map(b => b.name).join(', ')}</span>}
                                                 </div>
                                                 <div className="user-card-email">{u.email}</div>
                                                 <div className="user-card-tags">
@@ -772,6 +791,134 @@ export default function AdminDashboard() {
                                 ))}
                             </div>
                         )}
+                    </div>
+                </>)}
+
+                {/* ===== ANALYTICS TAB ===== */}
+                {activeTab === 'analytics' && (<>
+                    <div className="analytics-section">
+                        <div className="section-header">
+                            <h2>📊 Site Access Analytics</h2>
+                            <div className="analytics-period-btns">
+                                {[{ val: 7, lbl: '7 Days' }, { val: 14, lbl: '14 Days' }, { val: 30, lbl: '30 Days' }, { val: 90, lbl: '90 Days' }].map(p => (
+                                    <button key={p.val} className={`user-filter-btn${visitDays === p.val ? ' active' : ''}`} onClick={() => setVisitDays(p.val)}>{p.lbl}</button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {visitLoading ? <div className="loading">Loading analytics...</div> : visitError ? <div className="error">{visitError}</div> : visitStats && (<>
+                            {/* Overview cards */}
+                            <div className="analytics-overview">
+                                {[
+                                    { icon: '🌐', val: visitStats.grandTotal, lbl: 'Total Visits', cls: 'total' },
+                                    { icon: '📅', val: visitStats.todayCount, lbl: 'Today', cls: 'today' },
+                                    { icon: '👤', val: visitStats.totals.anonymous, lbl: 'Anonymous', cls: 'anon' },
+                                    { icon: '👥', val: visitStats.totals.user, lbl: 'Users', cls: 'user' },
+                                    { icon: '🏪', val: visitStats.totals.shop_owner, lbl: 'Shop Owners', cls: 'shop' }
+                                ].map((s, i) => (
+                                    <div key={i} className={`analytics-stat-card analytics-${s.cls}`}>
+                                        <span className="analytics-stat-icon">{s.icon}</span>
+                                        <span className="analytics-stat-num">{s.val}</span>
+                                        <span className="analytics-stat-lbl">{s.lbl}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Stacked bar chart */}
+                            {visitStats.daily?.length > 0 && (() => {
+                                const data = visitStats.daily
+                                const maxCount = Math.max(...data.map(d => d.anonymous + d.user + d.shop_owner), 1)
+                                const barWidth = 28
+                                const gap = 4
+                                const chartHeight = 180
+                                const svgWidth = data.length * (barWidth + gap) + gap
+                                const colors = { anonymous: '#94a3b8', user: '#3b82f6', shop_owner: '#f59e0b' }
+
+                                return (
+                                    <div className="analytics-chart-wrap">
+                                        <div className="analytics-chart-header">
+                                            <span className="analytics-chart-title">Daily Visits by Type</span>
+                                            <div className="analytics-legend">
+                                                <span className="analytics-legend-item"><span className="analytics-dot" style={{ background: colors.anonymous }} /> Anonymous</span>
+                                                <span className="analytics-legend-item"><span className="analytics-dot" style={{ background: colors.user }} /> Users</span>
+                                                <span className="analytics-legend-item"><span className="analytics-dot" style={{ background: colors.shop_owner }} /> Shop Owners</span>
+                                            </div>
+                                        </div>
+                                        <div className="analytics-chart-scroll">
+                                            <svg width={svgWidth} height={chartHeight + 36} className="analytics-chart-svg">
+                                                {data.map((d, i) => {
+                                                    const total = d.anonymous + d.user + d.shop_owner
+                                                    const fullH = Math.max((total / maxCount) * chartHeight, 2)
+                                                    const x = i * (barWidth + gap) + gap
+                                                    const shopH = (d.shop_owner / maxCount) * chartHeight
+                                                    const userH = (d.user / maxCount) * chartHeight
+                                                    const anonH = (d.anonymous / maxCount) * chartHeight
+                                                    const dateLabel = d.date.slice(5) // MM-DD
+                                                    return (
+                                                        <g key={i}>
+                                                            {/* anonymous (bottom) */}
+                                                            <rect x={x} y={chartHeight - anonH} width={barWidth} height={Math.max(anonH, 0)} rx={0} fill={colors.anonymous} />
+                                                            {/* user (middle) */}
+                                                            <rect x={x} y={chartHeight - anonH - userH} width={barWidth} height={Math.max(userH, 0)} rx={0} fill={colors.user} />
+                                                            {/* shop_owner (top) */}
+                                                            <rect x={x} y={chartHeight - anonH - userH - shopH} width={barWidth} height={Math.max(shopH, 0)} rx={2} fill={colors.shop_owner} />
+                                                            {total > 0 && <text x={x + barWidth / 2} y={chartHeight - fullH - 4} textAnchor="middle" className="analytics-chart-val">{total}</text>}
+                                                            {i % (data.length > 30 ? 7 : data.length > 14 ? 3 : 1) === 0 && (
+                                                                <text x={x + barWidth / 2} y={chartHeight + 16} textAnchor="middle" className="analytics-chart-label">{dateLabel}</text>
+                                                            )}
+                                                        </g>
+                                                    )
+                                                })}
+                                            </svg>
+                                        </div>
+                                    </div>
+                                )
+                            })()}
+
+                            {/* Pie chart summary */}
+                            {(() => {
+                                const total = visitStats.grandTotal || 1
+                                const pcts = {
+                                    anonymous: Math.round((visitStats.totals.anonymous / total) * 100),
+                                    user: Math.round((visitStats.totals.user / total) * 100),
+                                    shop_owner: Math.round((visitStats.totals.shop_owner / total) * 100)
+                                }
+                                const r = 60, cx = 80, cy = 80
+                                const circumference = 2 * Math.PI * r
+                                const anonArc = (visitStats.totals.anonymous / total) * circumference
+                                const userArc = (visitStats.totals.user / total) * circumference
+                                const shopArc = (visitStats.totals.shop_owner / total) * circumference
+
+                                return (
+                                    <div className="analytics-pie-wrap">
+                                        <div className="analytics-pie-header">Visitor Distribution</div>
+                                        <div className="analytics-pie-content">
+                                            <svg width={160} height={160} className="analytics-pie-svg">
+                                                <circle cx={cx} cy={cy} r={r} fill="none" stroke="#94a3b8" strokeWidth="20"
+                                                    strokeDasharray={`${anonArc} ${circumference - anonArc}`}
+                                                    strokeDashoffset={0}
+                                                    transform={`rotate(-90 ${cx} ${cy})`} />
+                                                <circle cx={cx} cy={cy} r={r} fill="none" stroke="#3b82f6" strokeWidth="20"
+                                                    strokeDasharray={`${userArc} ${circumference - userArc}`}
+                                                    strokeDashoffset={-anonArc}
+                                                    transform={`rotate(-90 ${cx} ${cy})`} />
+                                                <circle cx={cx} cy={cy} r={r} fill="none" stroke="#f59e0b" strokeWidth="20"
+                                                    strokeDasharray={`${shopArc} ${circumference - shopArc}`}
+                                                    strokeDashoffset={-(anonArc + userArc)}
+                                                    transform={`rotate(-90 ${cx} ${cy})`} />
+                                                <text x={cx} y={cy - 6} textAnchor="middle" className="analytics-pie-total">{visitStats.grandTotal}</text>
+                                                <text x={cx} y={cy + 12} textAnchor="middle" className="analytics-pie-label-text">visits</text>
+                                            </svg>
+                                            <div className="analytics-pie-legend">
+                                                <div className="analytics-pie-row"><span className="analytics-dot" style={{ background: '#94a3b8' }} /> Anonymous <strong>{pcts.anonymous}%</strong> ({visitStats.totals.anonymous})</div>
+                                                <div className="analytics-pie-row"><span className="analytics-dot" style={{ background: '#3b82f6' }} /> Users <strong>{pcts.user}%</strong> ({visitStats.totals.user})</div>
+                                                <div className="analytics-pie-row"><span className="analytics-dot" style={{ background: '#f59e0b' }} /> Shop Owners <strong>{pcts.shop_owner}%</strong> ({visitStats.totals.shop_owner})</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            })()}
+                        </>)}
                     </div>
                 </>)}
 

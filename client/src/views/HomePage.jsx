@@ -23,7 +23,7 @@ export default function HomePage() {
     const isAuthenticated = !!token
 
     const businessCount = 150
-    const categoryCount = 6
+    const categoryCount = 8
 
     const categories = [
         { id: 1, slug: 'sim-cards', name: t('category.simCards'), icon: '📶', description: t('category.simCardsDesc') },
@@ -32,6 +32,8 @@ export default function HomePage() {
         { id: 4, slug: 'yakiniku', name: t('category.yakiniku'), icon: '🥩', description: t('category.yakinikuDesc') },
         { id: 5, slug: 'bookstores', name: t('category.bookstores'), icon: '📚', description: t('category.bookstoresDesc') },
         { id: 6, slug: 'currency-exchange', name: t('category.currencyExchange'), icon: '💱', description: t('category.currencyExchangeDesc') },
+        { id: 7, slug: 'jobs-fulltime', name: t('category.jobsFulltime'), icon: '💼', description: t('category.jobsFulltimeDesc') },
+        { id: 8, slug: 'jobs-parttime', name: t('category.jobsParttime'), icon: '🕐', description: t('category.jobsParttimeDesc') },
     ]
 
     return (
