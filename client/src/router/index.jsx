@@ -4,7 +4,7 @@
  * Defines all application routes with lazy-loaded views.
  * Includes ProtectedRoute for auth-protected pages.
  *
- * Base path: /tattant/ (production sub-directory)
+ * Base path: / (production root)
  */
 
 import React, { Suspense, lazy } from 'react'

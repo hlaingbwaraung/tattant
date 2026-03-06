@@ -22,7 +22,7 @@ Write-Host "[3/5] Deploying backend on server..." -ForegroundColor Yellow
 ssh -i $KEY $SRV "pm2 stop tattant-server 2>/dev/null || true"
 ssh -i $KEY $SRV "sudo rm -rf /opt/tattant-server/src && sudo cp -r /home/ubuntu/new-src /opt/tattant-server/src && sudo cp /home/ubuntu/new-package.json /opt/tattant-server/package.json && sudo chown -R ubuntu:ubuntu /opt/tattant-server"
 ssh -i $KEY $SRV "cd /opt/tattant-server && npm install --production --silent"
-ssh -i $KEY $SRV "cd /opt/tattant-server && DATABASE_URL=postgresql://suteki:suteki_pass_2026@localhost:5432/suteki NODE_ENV=production npx sequelize-cli db:migrate"
+ssh -i $KEY $SRV \"cd /opt/tattant-server && DATABASE_URL=postgresql://postgres:Ngulaymizlay778899@db.zekwwhrmosxlleoqrqyc.supabase.co:5432/postgres NODE_ENV=production npx sequelize-cli db:migrate\"
 Write-Host "  Backend deployed!" -ForegroundColor Green
 
 # Step 4: Deploy frontend on server
@@ -45,4 +45,4 @@ Write-Host ""
 ssh -i $KEY $SRV "curl -s http://localhost:5000/health"
 Write-Host ""
 Write-Host "=== DEPLOYMENT COMPLETE ===" -ForegroundColor Green
-Write-Host "Visit: https://tattant.com/tattant/" -ForegroundColor Cyan
+Write-Host "Visit: https://tattant.com/" -ForegroundColor Cyan

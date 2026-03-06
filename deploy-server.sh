@@ -30,10 +30,11 @@ EOF
 cat > /opt/tattant-server/.env << 'EOF'
 NODE_ENV=production
 PORT=5000
-DATABASE_URL=postgresql://tattant:tattant_pass_2026@localhost:5432/tattant
+DATABASE_URL=postgresql://postgres:Ngulaymizlay778899@db.zekwwhrmosxlleoqrqyc.supabase.co:5432/postgres
+DB_SSL=true
 JWT_SECRET=tattant_jwt_secret_2026_production_key
 JWT_EXPIRES_IN=7d
-FRONTEND_URL=https://www.tattant.com
+FRONTEND_URL=https://tattant.com
 
 # Google OAuth
 GOOGLE_CLIENT_ID=42655523729-p7n6gum8okmufu3tj6abb7b6olenvdsm.apps.googleusercontent.com
@@ -46,20 +47,38 @@ EMAIL_PASSWORD=xsin dqco ewdt tczj
 EMAIL_FROM="tattant <noreply@tattant.com>"
 EOF
 
-# Update config.json for production to use local DB without SSL
+# Update config.json for production to use Supabase with SSL
 cat > /opt/tattant-server/src/config/config.json << 'JSONEOF'
 {
   "development": {
-    "url": "postgresql://postgres:Aue46722@localhost:5432/tattant",
-    "dialect": "postgres"
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
   },
   "test": {
-    "url": "postgresql://postgres:Aue46722@localhost:5432/tattant_test",
-    "dialect": "postgres"
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
   },
   "production": {
     "use_env_variable": "DATABASE_URL",
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
   }
 }
 JSONEOF

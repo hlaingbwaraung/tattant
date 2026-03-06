@@ -9,6 +9,8 @@ import AppHeader from '../components/layout/AppHeader'
 import useAuthStore from '../store/useAuthStore'
 import { getAllRequests, approveRequest, rejectRequest } from '../services/shopOwnerRequestService'
 import { getAllContactMessages, markMessageAsRead, replyToMessage, deleteContactMessage } from '../services/contactService'
+import { getAllSettings, updateSetting } from '../services/settingsService'
+import { aiDeepSearch, aiImportResults } from '../services/aiSearchService'
 import './AdminDashboard.css'
 
 const emptyBlogForm = { title: '', title_my: '', emoji: '📝', photo: '', category: '', tag: '', excerpt: '', excerpt_my: '', content: '', content_my: '', read_time: '5 min read', published: true }
@@ -29,6 +31,23 @@ export default function AdminDashboard() {
     const currentUserId = user?.id
 
     const [activeTab, setActiveTab] = useState('users')
+
+    // Site Settings (feature flags)
+    const [siteSettings, setSiteSettings] = useState({})
+    const [settingsLoading, setSettingsLoading] = useState(false)
+
+    // AI Deep Search
+    const [aiQuery, setAiQuery] = useState('')
+    const [aiLocation, setAiLocation] = useState('Tokyo, Japan')
+    const [aiCuisine, setAiCuisine] = useState('Burmese')
+    const [aiMaxResults, setAiMaxResults] = useState(8)
+    const [aiSearching, setAiSearching] = useState(false)
+    const [aiResults, setAiResults] = useState([])
+    const [aiSelected, setAiSelected] = useState(new Set())
+    const [aiImporting, setAiImporting] = useState(false)
+    const [aiSearchLog, setAiSearchLog] = useState([])
+    const [aiError, setAiError] = useState('')
+    const [aiImportCategoryId, setAiImportCategoryId] = useState('')
 
     // Users
     const [users, setUsers] = useState([])
@@ -432,6 +451,121 @@ export default function AdminDashboard() {
 
     useEffect(() => { if (activeTab === 'analytics') loadVisitStats() }, [activeTab, loadVisitStats])
 
+    // Load site settings when Settings tab is active
+    const loadSiteSettings = useCallback(async () => {
+        setSettingsLoading(true)
+        try {
+            const res = await getAllSettings()
+            setSiteSettings(res.data?.data || {})
+        } catch { setSiteSettings({}) }
+        finally { setSettingsLoading(false) }
+    }, [])
+    useEffect(() => { if (activeTab === 'settings') loadSiteSettings() }, [activeTab, loadSiteSettings])
+
+    const toggleFeatureFlag = async (key) => {
+        const current = siteSettings[key] || { enabled: false }
+        const newValue = { enabled: !current.enabled }
+        try {
+            await updateSetting(key, newValue)
+            setSiteSettings(prev => ({ ...prev, [key]: newValue }))
+        } catch { alert('Failed to update setting') }
+    }
+
+    // AI Search handlers
+    const addSearchLog = (msg, type = 'info') => {
+        setAiSearchLog(prev => [...prev, { msg, type, time: new Date().toLocaleTimeString() }])
+    }
+
+    const runAiSearch = async () => {
+        if (!aiQuery.trim()) return
+        setAiSearching(true)
+        setAiResults([])
+        setAiSelected(new Set())
+        setAiError('')
+        setAiSearchLog([])
+
+        addSearchLog('🤖 Initializing AI Deep Search bot...', 'system')
+        addSearchLog(`🔍 Query: "${aiQuery}"`, 'info')
+        addSearchLog(`📍 Location: ${aiLocation}`, 'info')
+        addSearchLog(`🍜 Cuisine: ${aiCuisine}`, 'info')
+
+        setTimeout(() => addSearchLog('🌐 Scanning Facebook Myanmar communities...', 'search'), 500)
+        setTimeout(() => addSearchLog('📱 Crawling Google Maps listings...', 'search'), 1200)
+        setTimeout(() => addSearchLog('🗾 Searching Tabelog & Hot Pepper...', 'search'), 1800)
+        setTimeout(() => addSearchLog('📸 Analyzing Instagram food posts...', 'search'), 2400)
+        setTimeout(() => addSearchLog('💬 Mining Myanmar community forums...', 'search'), 3000)
+
+        try {
+            const res = await aiDeepSearch({
+                query: aiQuery,
+                location: aiLocation,
+                cuisine: aiCuisine,
+                maxResults: aiMaxResults
+            })
+            const results = res.data?.data || []
+            setAiResults(results)
+            addSearchLog(`✅ Found ${results.length} restaurants!`, 'success')
+            if (results.length === 0) {
+                addSearchLog('No new restaurants found. Try a different query.', 'warn')
+            }
+        } catch (err) {
+            const msg = err.response?.data?.error || err.message || 'Search failed'
+            const isQuota = msg.toLowerCase().includes('quota') || msg.includes('429') || msg.includes('rate')
+            const displayMsg = isQuota
+                ? '⚠️ Gemini API quota exhausted. The bot will auto-retry with fallback models. If this persists, wait a few minutes or upgrade your plan at https://ai.google.dev/pricing'
+                : msg
+            setAiError(displayMsg)
+            addSearchLog(`❌ Error: ${displayMsg}`, 'error')
+        } finally {
+            setAiSearching(false)
+        }
+    }
+
+    const toggleAiSelect = (index) => {
+        setAiSelected(prev => {
+            const next = new Set(prev)
+            next.has(index) ? next.delete(index) : next.add(index)
+            return next
+        })
+    }
+
+    const selectAllAi = () => {
+        if (aiSelected.size === aiResults.length) {
+            setAiSelected(new Set())
+        } else {
+            setAiSelected(new Set(aiResults.map((_, i) => i)))
+        }
+    }
+
+    const importSelectedAi = async () => {
+        if (aiSelected.size === 0) return
+        setAiImporting(true)
+        addSearchLog(`📦 Importing ${aiSelected.size} restaurants to database...`, 'system')
+        try {
+            const selectedRestaurants = [...aiSelected].map(i => aiResults[i])
+            const res = await aiImportResults({
+                restaurants: selectedRestaurants,
+                category_id: aiImportCategoryId || undefined
+            })
+            const data = res.data
+            addSearchLog(`✅ ${data.message}`, 'success')
+            if (data.imported?.length > 0) {
+                data.imported.forEach(r => addSearchLog(`  ✓ Added: ${r.name}`, 'success'))
+            }
+            if (data.skipped?.length > 0) {
+                data.skipped.forEach(r => addSearchLog(`  ⚠ Skipped: ${r.name} (${r.reason})`, 'warn'))
+            }
+            // Remove imported items from results
+            const importedNames = new Set((data.imported || []).map(r => r.name))
+            setAiResults(prev => prev.filter(r => !importedNames.has(r.name)))
+            setAiSelected(new Set())
+        } catch (err) {
+            addSearchLog(`❌ Import failed: ${err.response?.data?.error || err.message}`, 'error')
+        } finally {
+            setAiImporting(false)
+        }
+    }
+
     const bf = (field) => (e) => setBlogForm(p => ({ ...p, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
     const cf = (field) => (e) => setCategoryForm(p => ({ ...p, [field]: e.target.type === 'number' ? Number(e.target.value) : e.target.value }))
     const sf = (field) => (e) => setShopForm(p => ({ ...p, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
@@ -459,9 +593,9 @@ export default function AdminDashboard() {
                 <div className="page-header"><h1>👨‍💼 Admin Dashboard</h1><p className="subtitle">Manage Users, Blogs & Statistics</p></div>
 
                 <div className="tab-nav">
-                    {['users', 'blogs', 'categories', 'shops', 'requests', 'contacts', 'analytics'].map(tab => (
+                    {['users', 'blogs', 'categories', 'shops', 'requests', 'contacts', 'analytics', 'ai-search', 'settings'].map(tab => (
                         <button key={tab} className={`tab-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                            {tab === 'users' ? '👥' : tab === 'blogs' ? '📝' : tab === 'categories' ? '📂' : tab === 'shops' ? '🏪' : tab === 'requests' ? '📋' : tab === 'contacts' ? '📩' : '📊'} {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab === 'users' ? '👥' : tab === 'blogs' ? '📝' : tab === 'categories' ? '📂' : tab === 'shops' ? '🏪' : tab === 'requests' ? '📋' : tab === 'contacts' ? '📩' : tab === 'analytics' ? '📊' : tab === 'ai-search' ? '🤖' : '⚙️'} {tab === 'ai-search' ? 'AI Search' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                             {tab === 'requests' && requestCounts.pending > 0 && <span className="badge-count">{requestCounts.pending}</span>}
                             {tab === 'contacts' && contactCounts.unread > 0 && <span className="badge-count">{contactCounts.unread}</span>}
                         </button>
@@ -919,6 +1053,178 @@ export default function AdminDashboard() {
                                 )
                             })()}
                         </>)}
+                    </div>
+                </>)}
+
+                {/* ===== SETTINGS TAB ===== */}
+                {activeTab === 'settings' && (<>
+                    <div className="section-card">
+                        <div className="section-header"><h2>⚙️ Site Settings</h2></div>
+                        {settingsLoading ? <p style={{ padding: '20px', textAlign: 'center' }}>Loading settings...</p> : (
+                            <div className="settings-list">
+                                {/* Jobs Feature Toggle */}
+                                <div className="setting-item">
+                                    <div className="setting-info">
+                                        <div className="setting-label">💼 Jobs Section</div>
+                                        <div className="setting-desc">Show or hide the Jobs dropdown in the navigation bar for all users.</div>
+                                    </div>
+                                    <button
+                                        className={`setting-toggle ${siteSettings.feature_jobs?.enabled ? 'toggle-on' : 'toggle-off'}`}
+                                        onClick={() => toggleFeatureFlag('feature_jobs')}
+                                    >
+                                        <span className="toggle-knob" />
+                                        <span className="toggle-label">{siteSettings.feature_jobs?.enabled ? 'ON' : 'OFF'}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </>)}
+
+                {/* ===== AI SEARCH TAB ===== */}
+                {activeTab === 'ai-search' && (<>
+                    <div className="ai-search-container">
+                        {/* Search Panel */}
+                        <div className="section-card ai-search-panel">
+                            <div className="section-header">
+                                <h2>🤖 AI Deep Search Bot</h2>
+                                <span className="ai-badge">Powered by Gemini AI</span>
+                            </div>
+                            <p className="ai-subtitle">Deep dive into Facebook, Google Maps, Tabelog & community forums to find Burmese restaurants in Japan and auto-add them to your shops.</p>
+
+                            <div className="ai-search-form">
+                                <div className="ai-form-row">
+                                    <div className="ai-form-group ai-form-main">
+                                        <label>🔍 Search Query</label>
+                                        <input
+                                            type="text"
+                                            value={aiQuery}
+                                            onChange={e => setAiQuery(e.target.value)}
+                                            placeholder="e.g. Burmese restaurants in Takadanobaba, Myanmar food near Shin-Okubo..."
+                                            onKeyDown={e => e.key === 'Enter' && !aiSearching && runAiSearch()}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="ai-form-row">
+                                    <div className="ai-form-group">
+                                        <label>📍 Location</label>
+                                        <input type="text" value={aiLocation} onChange={e => setAiLocation(e.target.value)} placeholder="Tokyo, Japan" />
+                                    </div>
+                                    <div className="ai-form-group">
+                                        <label>🍜 Cuisine Type</label>
+                                        <select value={aiCuisine} onChange={e => setAiCuisine(e.target.value)}>
+                                            <option value="Burmese">Burmese / Myanmar</option>
+                                            <option value="Shan">Shan Cuisine</option>
+                                            <option value="Burmese and Southeast Asian">Burmese + SE Asian</option>
+                                            <option value="Halal Burmese">Halal Burmese</option>
+                                            <option value="Any Asian">Any Asian</option>
+                                        </select>
+                                    </div>
+                                    <div className="ai-form-group">
+                                        <label>📊 Max Results</label>
+                                        <select value={aiMaxResults} onChange={e => setAiMaxResults(Number(e.target.value))}>
+                                            <option value={5}>5</option>
+                                            <option value={8}>8</option>
+                                            <option value={10}>10</option>
+                                            <option value={15}>15</option>
+                                            <option value={20}>20</option>
+                                        </select>
+                                    </div>
+                                    <div className="ai-form-group">
+                                        <label>📂 Import Category</label>
+                                        <select value={aiImportCategoryId} onChange={e => setAiImportCategoryId(e.target.value)}>
+                                            <option value="">Auto (Restaurants)</option>
+                                            {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name_en}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                                <button className="ai-search-btn" onClick={runAiSearch} disabled={aiSearching || !aiQuery.trim()}>
+                                    {aiSearching ? (
+                                        <><span className="ai-spinner" /> Searching deeply...</>
+                                    ) : (
+                                        <>🚀 Launch Deep Search</>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Live Search Log */}
+                        {aiSearchLog.length > 0 && (
+                            <div className="section-card ai-log-panel">
+                                <div className="section-header"><h2>📡 Search Log</h2></div>
+                                <div className="ai-log-scroll">
+                                    {aiSearchLog.map((log, i) => (
+                                        <div key={i} className={`ai-log-line ai-log-${log.type}`}>
+                                            <span className="ai-log-time">{log.time}</span>
+                                            <span className="ai-log-msg">{log.msg}</span>
+                                        </div>
+                                    ))}
+                                    {aiSearching && <div className="ai-log-line ai-log-search"><span className="ai-log-time">{new Date().toLocaleTimeString()}</span><span className="ai-log-msg ai-typing">⏳ AI is analyzing data<span className="dots">...</span></span></div>}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Error */}
+                        {aiError && <div className="ai-error-box">❌ {aiError}</div>}
+
+                        {/* Results */}
+                        {aiResults.length > 0 && (
+                            <div className="section-card ai-results-panel">
+                                <div className="section-header">
+                                    <h2>📋 Found {aiResults.length} Restaurants</h2>
+                                    <div className="ai-results-actions">
+                                        <button className="ai-select-all-btn" onClick={selectAllAi}>
+                                            {aiSelected.size === aiResults.length ? '☐ Deselect All' : '☑ Select All'}
+                                        </button>
+                                        <button
+                                            className="ai-import-btn"
+                                            onClick={importSelectedAi}
+                                            disabled={aiSelected.size === 0 || aiImporting}
+                                        >
+                                            {aiImporting ? (
+                                                <><span className="ai-spinner" /> Importing...</>
+                                            ) : (
+                                                <>📥 Import Selected ({aiSelected.size})</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="ai-results-grid">
+                                    {aiResults.map((r, i) => (
+                                        <div
+                                            key={i}
+                                            className={`ai-result-card ${aiSelected.has(i) ? 'ai-card-selected' : ''}`}
+                                            onClick={() => toggleAiSelect(i)}
+                                        >
+                                            <div className="ai-card-select">
+                                                <span className={`ai-checkbox ${aiSelected.has(i) ? 'checked' : ''}`}>
+                                                    {aiSelected.has(i) ? '✓' : ''}
+                                                </span>
+                                            </div>
+                                            <div className="ai-card-body">
+                                                <div className="ai-card-header">
+                                                    <h3 className="ai-card-name">{r.name}</h3>
+                                                    <span className={`ai-confidence ai-conf-${r.confidence}`}>{r.confidence}</span>
+                                                </div>
+                                                <p className="ai-card-desc">{r.description_en}</p>
+                                                {r.description_my && <p className="ai-card-desc-my">{r.description_my}</p>}
+                                                <div className="ai-card-meta">
+                                                    <span>📍 {r.address}</span>
+                                                    {r.phone && <span>📞 {r.phone}</span>}
+                                                    <span>💰 {r.price_range}</span>
+                                                </div>
+                                                {r.tags && r.tags.length > 0 && (
+                                                    <div className="ai-card-tags">
+                                                        {r.tags.map((tag, ti) => <span key={ti} className="ai-tag">{tag}</span>)}
+                                                    </div>
+                                                )}
+                                                <div className="ai-card-source">Source: {r.source_hint}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </>)}
 

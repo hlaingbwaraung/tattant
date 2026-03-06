@@ -8,6 +8,7 @@
 
 import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import useThemeStore from './store/useThemeStore'
 import AppRoutes from './router'
 import ChatBot from './components/ui/ChatBot'
@@ -18,6 +19,12 @@ export default function App() {
     useThemeStore()
 
     const location = useLocation()
+    const { i18n } = useTranslation()
+
+    // Sync <html lang="..."> with i18n language for Burmese typography CSS
+    useEffect(() => {
+        document.documentElement.lang = i18n.language
+    }, [i18n.language])
 
     // Track page visit on route change
     useEffect(() => {

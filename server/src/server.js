@@ -9,6 +9,7 @@ const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
+const compression = require('compression')
 const rateLimit = require('express-rate-limit')
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') })
 
@@ -21,7 +22,19 @@ const PORT = process.env.PORT || 5000
 app.set('trust proxy', 1)
 
 /* ========================================
- *  1. Security & Parsing Middleware
+ *  1. Performance: Compression
+ * ======================================== */
+app.use(compression({
+  level: 6,                          // Good balance of speed vs compression
+  threshold: 1024,                   // Only compress responses > 1KB
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false
+    return compression.filter(req, res)
+  }
+}))
+
+/* ========================================
+ *  2. Security & Parsing Middleware
  * ======================================== */
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -77,6 +90,22 @@ app.get('/health', (_req, res) => {
 })
 
 /* ========================================
+ *  4b. Cache Headers for Public GET Endpoints
+ * ======================================== */
+const cachePublicGET = (duration = 300) => (req, res, next) => {
+  if (req.method === 'GET') {
+    res.set('Cache-Control', `public, max-age=${duration}, stale-while-revalidate=${duration * 2}`)
+  }
+  next()
+}
+
+// Cache categories & businesses lists for 5 minutes
+app.use('/api/categories', cachePublicGET(300))
+app.use('/api/businesses', cachePublicGET(120))
+app.use('/api/blogs', cachePublicGET(300))
+app.use('/api/settings', cachePublicGET(600))
+
+/* ========================================
  *  5. API Routes
  * ======================================== */
 app.use('/api/auth', require('./routes/authRoutes'))
@@ -95,6 +124,8 @@ app.use('/api/bookings', require('./routes/bookingRoutes'))
 app.use('/api/chat', require('./routes/chatRoutes'))
 app.use('/api/contact', require('./routes/contactRoutes'))
 app.use('/api/visits', require('./routes/visitRoutes'))
+app.use('/api/settings', require('./routes/settingsRoutes'))
+app.use('/api/ai-search', require('./routes/aiSearchRoutes'))
 
 /* ========================================
  *  6. Error Handling

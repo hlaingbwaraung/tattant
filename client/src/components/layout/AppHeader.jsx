@@ -12,6 +12,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useAuthStore from '../../store/useAuthStore'
 import useThemeStore from '../../store/useThemeStore'
+import { getSetting } from '../../services/settingsService'
 import './AppHeader.css'
 
 export default function AppHeader() {
@@ -27,6 +28,7 @@ export default function AppHeader() {
 
     const [showUserMenu, setShowUserMenu] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [showJobs, setShowJobs] = useState(false)
     const userMenuRef = useRef(null)
 
     const currentLang = i18n.language
@@ -77,6 +79,13 @@ export default function AppHeader() {
         }
     }, [])
 
+    /* ---------- Fetch Jobs feature flag ---------- */
+    useEffect(() => {
+        getSetting('feature_jobs')
+            .then(res => setShowJobs(res.data?.data?.enabled || false))
+            .catch(() => setShowJobs(false))
+    }, [])
+
     const isActive = (path) => location.pathname === path
 
     return (
@@ -93,7 +102,7 @@ export default function AppHeader() {
                     <Link to="/explore" className={`nav-link desktop-nav ${isActive('/explore') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.explore')}</Link>
 
                     {/* Jobs dropdown (desktop) */}
-                    <div className="nav-dropdown desktop-nav">
+                    {showJobs && <div className="nav-dropdown desktop-nav">
                         <button className={`nav-link nav-dropdown-trigger ${location.pathname.startsWith('/categories/jobs') ? 'active' : ''}`}>
                             {t('category.jobs')} <span className="nav-dropdown-arrow">▾</span>
                         </button>
@@ -113,7 +122,7 @@ export default function AppHeader() {
                                 </div>
                             </Link>
                         </div>
-                    </div>
+                    </div>}
 
                     <Link to="/about-japan" className={`nav-link desktop-nav ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.about')}</Link>
 
@@ -144,7 +153,7 @@ export default function AppHeader() {
                                 </Link>
 
                                 {/* Jobs sub-section (mobile) */}
-                                <div className="mobile-nav-group">
+                                {showJobs && <div className="mobile-nav-group">
                                     <div className="mobile-nav-group-label"><span className="mobile-nav-icon">💼</span> {t('category.jobs')}</div>
                                     <Link to="/categories/jobs-fulltime" className={`mobile-nav-item mobile-nav-sub ${isActive('/categories/jobs-fulltime') ? 'active' : ''}`} onClick={closeMobile}>
                                         <span className="mobile-nav-icon">💼</span> {t('category.jobsFulltime')}
@@ -152,7 +161,7 @@ export default function AppHeader() {
                                     <Link to="/categories/jobs-parttime" className={`mobile-nav-item mobile-nav-sub ${isActive('/categories/jobs-parttime') ? 'active' : ''}`} onClick={closeMobile}>
                                         <span className="mobile-nav-icon">🕐</span> {t('category.jobsParttime')}
                                     </Link>
-                                </div>
+                                </div>}
 
                                 <Link to="/about-japan" className={`mobile-nav-item ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>
                                     <span className="mobile-nav-icon">🗾</span> {t('nav.about')}

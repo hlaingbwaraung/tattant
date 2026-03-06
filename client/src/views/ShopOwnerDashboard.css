@@ -740,8 +740,12 @@
 }
 
 .menu-item-name-my {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-tertiary, #94a3b8);
+  font-family: var(--font-myanmar), var(--font-sans);
+  line-height: 1.8;
+  letter-spacing: 0.03em;
+  margin-top: 0.15rem;
 }
 
 .menu-item-desc {

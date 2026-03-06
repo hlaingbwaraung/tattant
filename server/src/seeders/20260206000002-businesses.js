@@ -18,7 +18,7 @@ module.exports = {
       // SIM Cards
       {
         id: uuidv4(),
-        category_id: getCategoryId('sim-cards'),
+        category_id: getCategoryId('phone-and-sim-cards'),
         name: 'Sakura Mobile',
         description_en: 'Affordable SIM cards and pocket WiFi rental for tourists. English support available. Multiple data plans.',
         description_my: 'ခရီးသွားများအတွက် စျေးနှုန်းသက်သာသော SIM ကတ်များနှင့် Pocket WiFi ငှားရမ်းနိုင်ပါသည်။ အင်္ဂလိပ်ဘာသာဖြင့် ဝန်ဆောင်မှုပေးပြီး Data Plan အမျိုးမျိုး ရွေးချယ်နိုင်ပါသည်။',
@@ -46,7 +46,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('sim-cards'),
+        category_id: getCategoryId('phone-and-sim-cards'),
         name: 'Japan Wireless',
         description_en: 'Premium eSIM and physical SIM cards. Instant activation. 24/7 customer support.',
         description_my: 'ပရီမီယံ eSIM နှင့် ရိုးရိုး SIM ကတ်များ ရရှိနိုင်ပါသည်။ ချက်ချင်း အသုံးပြုနိုင်ပြီး ၂၄ နာရီ ဝန်ဆောင်မှုပေးပါသည်။',
@@ -76,7 +76,7 @@ module.exports = {
       // Burmese Restaurants in Tokyo
       {
         id: uuidv4(),
-        category_id: getCategoryId('ramen'),
+        category_id: getCategoryId('restaurants'),
         name: 'Nong Inlay (ノングインレー)',
         description_en: 'Authentic Burmese & Shan cuisine in the heart of Takadanobaba. Famous for Shan noodles, tea leaf salad, and rich curries. A beloved gathering spot for the Burmese community in Tokyo.',
         description_my: 'တကဒနိုဘာဘ ရှိ စစ်မှန်သော မြန်မာနှင့် ရှမ်းအစားအစာဆိုင်။ ရှမ်းခေါက်ဆွဲ၊ လက်ဖက်သုပ်နှင့် ဟင်းချက်အမျိုးမျိုးဖြင့် နာမည်ကြီးပါသည်။ တိုကျိုရှိ မြန်မာအသိုင်းအဝိုင်း စုဝေးရာ နေရာလည်းဖြစ်ပါသည်။',
@@ -104,7 +104,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('ramen'),
+        category_id: getCategoryId('restaurants'),
         name: 'Myanmar Shwe Myay (ミャンマー・シュエミャイ)',
         description_en: 'Popular Burmese eatery in Takadanobaba serving mohinga, Burmese curry rice, and crispy samusas. Affordable prices and generous portions loved by students and workers alike.',
         description_my: 'တကဒနိုဘာဘ ရှိ လူကြိုက်များသော မြန်မာစားသောက်ဆိုင်။ မုန့်ဟင်းခါး၊ ထမင်းနှင့်ဟင်း၊ ဆမူဆာ စသည်တို့ကို ရရှိနိုင်ပါသည်။ စျေးနှုန်းသက်သာပြီး ပမာဏများစွာ ရရှိနိုင်ပါသည်။',
@@ -132,7 +132,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('sushi'),
+        category_id: getCategoryId('restaurants'),
         name: 'Ruby Myanmar (ルビーミャンマー)',
         description_en: 'Beloved Burmese restaurant near Takadanobaba station. Known for authentic Burmese biryani, fish curry, and traditional sweets. Cozy family-run atmosphere with Burmese TV playing.',
         description_my: 'တကဒနိုဘာဘ ဘူတာရှေ့ အနီးရှိ ချစ်စဖွယ် မြန်မာစားသောက်ဆိုင်။ စစ်မှန်သော မြန်မာဒံပေါက်ထမင်း၊ ငါးဟင်းနှင့် မြန်မာမုန့်များ ရရှိနိုင်ပါသည်။ မိသားစုလို ပျော်ရွှင်ဖွယ် ပတ်ဝန်းကျင်ဖြစ်ပါသည်။',
@@ -160,7 +160,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('sushi'),
+        category_id: getCategoryId('restaurants'),
         name: 'Min Tei (ミンテイ)',
         description_en: 'Hidden gem Burmese restaurant in Shimokitazawa. Serves traditional tea leaf salad, coconut chicken noodles (ohn no khauk swe), and refreshing Burmese milk tea in a trendy neighborhood.',
         description_my: 'ရှိမိုကီတဇဝ ရှိ လူသိနည်းသော မြန်မာစားသောက်ဆိုင်ကောင်း။ လက်ဖက်သုပ်၊ အုန်းနို့ခေါက်ဆွဲနှင့် မြန်မာလက်ဖက်ရည် စသည်တို့ကို ရရှိနိုင်ပါသည်။ ခေတ်မှီရပ်ကွက်တွင် တည်ရှိပါသည်။',
@@ -188,7 +188,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('yakiniku'),
+        category_id: getCategoryId('restaurants'),
         name: 'Golden Myanmar (ゴールデン・ミャンマー)',
         description_en: 'Lively Burmese restaurant and bar in Takadanobaba. Famous for htamin jin (fermented rice salad), grilled skewers, and Myanmar Beer. Live Burmese music on weekends!',
         description_my: 'တကဒနိုဘာဘ ရှိ အသက်ဝင်လှုပ်ရှားသော မြန်မာစားသောက်ဆိုင်နှင့် ဘား။ ထမင်းချဉ်၊ အသားကင်တံချောင်းများနှင့် မြန်မာဘီယာ စသည်တို့ဖြင့် နာမည်ကြီးပါသည်။ စနေ-တနင်္ဂနွေ ညများတွင် မြန်မာဂီတဖျော်ဖြေမှုရှိပါသည်!',
@@ -216,7 +216,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('yakiniku'),
+        category_id: getCategoryId('restaurants'),
         name: 'Mandalay Restaurant (マンダレー)',
         description_en: 'Upscale Burmese dining in Shin-Okubo. Features traditional Mandalay cuisine with rich curries, laphet thoke, and Burmese desserts. Popular for group celebrations and weekend gatherings.',
         description_my: 'ရှင်းအိုကုဘို ရှိ အဆင့်မြင့် မြန်မာစားသောက်ဆိုင်။ မန္တလေးရိုးရာ ဟင်းလျာများဖြစ်သော ဟင်းအမျိုးမျိုး၊ လက်ဖက်သုပ်နှင့် မြန်မာမုန့်များ ရရှိနိုင်ပါသည်။ အဖွဲ့လိုက်ပွဲများအတွက် လူကြိုက်များပါသည်။',
@@ -244,7 +244,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('ramen'),
+        category_id: getCategoryId('restaurants'),
         name: 'Yoma Myanmar (ヨーマミャンマー)',
         description_en: 'Cozy Burmese cafe in Nakano known for rich mohinga breakfast soup, samusa thoke, and strong Burmese coffee. A morning favorite among Myanmar expats.',
         description_my: 'နကနို ရှိ သက်တောင့်သက်သာ မြန်မာကဖီးဆိုင်။ မုန့်ဟင်းခါး မနက်စာ၊ ဆမူဆာသုပ်နှင့် မြန်မာကော်ဖီ စသည်တို့ဖြင့် နာမည်ကြီးပါသည်။ မြန်မာရွှေ့ပြောင်းနေထိုင်သူများ၏ မနက်စာ အကြိုက်ဆုံးနေရာဖြစ်ပါသည်။',
@@ -272,7 +272,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('sushi'),
+        category_id: getCategoryId('restaurants'),
         name: 'Bagan Restaurant (バガン)',
         description_en: 'Elegant Burmese restaurant in Ikebukuro inspired by the ancient temples of Bagan. Specializes in Burmese set meals, pennywort salad, and traditional egg noodle salad (nan gyi thoke).',
         description_my: 'ဘုရားပုဂံ၏ လှပမှုကို ပုံဖော်ထားသော အီကေဘိုကိုရို ရှိ မြန်မာစားသောက်ဆိုင်။ မြန်မာ Set Meal၊ မြင်းခွာရွက်သုပ်နှင့် နန်းကြီးသုပ် စသည်တို့ကို အထူးပြင်ဆင်ထားပါသည်။',
@@ -300,7 +300,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('ramen'),
+        category_id: getCategoryId('restaurants'),
         name: 'Shwe Taung (シュエタウン)',
         description_en: 'Casual Burmese street food stall in Shin-Okubo. Try their famous Shan tofu salad, tea leaf rice, and crispy onion fritters. Quick, cheap, and incredibly flavorful.',
         description_my: 'ရှင်းအိုကုဘို ရှိ မြန်မာလမ်းဘေးစားစရာဆိုင်။ ရှမ်းတိုဟူးသုပ်၊ လက်ဖက်ထမင်းနှင့် ကြက်သွန်နီကြော် စသည့် စာားစရာများ ရရှိနိုင်ပါသည်။ မြန်မြန်ဆန်ဆန်၊ စျေးသက်သာပြီး အလွန်အရသာရှိပါသည်။',
@@ -328,7 +328,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('yakiniku'),
+        category_id: getCategoryId('restaurants'),
         name: 'Inle Lake (インレー湖)',
         description_en: 'Premium Burmese BBQ and hotpot restaurant in Takadanobaba. Named after the famous Inle Lake. Grilled meats Burmese-style with special dipping sauces, plus traditional soups and salads.',
         description_my: 'တကဒနိုဘာဘ ရှိ မြန်မာအသားကင်နှင့် ဟော့ပေါ့စားသောက်ဆိုင်။ နာမည်ကြီး အင်းလေးကန်မှ အမည်ယူထားပါသည်။ မြန်မာအမဲ့ရည်ဖြင့် အသားကင်များ၊ ရိုးရာစူပ်နှင့် အသုပ်များ ရရှိနိုင်ပါသည်။',
@@ -356,7 +356,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        category_id: getCategoryId('sushi'),
+        category_id: getCategoryId('restaurants'),
         name: 'Yangon Kitchen (ヤンゴンキッチン)',
         description_en: 'Modern Burmese fusion restaurant in Shinjuku. Creative dishes blending Burmese and Japanese flavors. Try their signature Burmese curry udon and matcha laphet cake.',
         description_my: 'ရှင်ဂျုကု ရှိ ခေတ်မှီ မြန်မာ Fusion စားသောက်ဆိုင်။ မြန်မာနှင့် ဂျပန် အရသာများ ပေါင်းစပ်ထားသော ဖန်တီးမှုအသစ်များ ရရှိနိုင်ပါသည်။ မြန်မာဟင်း ဥဒုန်းနှင့် Matcha လက်ဖက်ကိတ်များ စမ်းသပ်ကြည့်ပါ။',
@@ -386,7 +386,7 @@ module.exports = {
       // Bookstores
       {
         id: uuidv4(),
-        category_id: getCategoryId('bookstores'),
+        category_id: getCategoryId('book-stores'),
         name: 'Kinokuniya Shinjuku',
         description_en: 'Massive bookstore with extensive English and manga sections. 7 floors of books.',
         description_my: 'အင်္ဂလိပ်စာအုပ်များနှင့် မန်ဂါ (Manga) စာအုပ်များ စုံလင်စွာ ရရှိနိုင်သည့် စာအုပ်ဆိုင်ကြီး။ စာအုပ်များကြည့်ရှုရန် ၇ ထပ် ရှိပါသည်။',

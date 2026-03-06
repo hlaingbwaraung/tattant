@@ -12,8 +12,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
 
-  // Sub-directory base for production
-  base: '/tattant/',
+  // Root base for production (tattant.com)
+  base: '/',
 
   server: {
     proxy: {
@@ -23,5 +23,44 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+
+  /* ===== Performance Optimizations ===== */
+  build: {
+    // Target modern browsers for smaller bundles
+    target: 'es2020',
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,   // Remove console.log in production
+        drop_debugger: true,
+        pure_funcs: ['console.info', 'console.debug', 'console.warn']
+      }
+    },
+    // Chunk splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-i18n': ['i18next', 'react-i18next'],
+          'vendor-state': ['zustand'],
+          'vendor-http': ['axios']
+        }
+      }
+    },
+    // Increase chunk warning limit
+    chunkSizeWarningLimit: 600,
+    // Generate source maps only in dev
+    sourcemap: false,
+    // Asset inlining threshold — inline small assets as base64
+    assetsInlineLimit: 4096,
+    // Enable CSS code splitting
+    cssCodeSplit: true
+  },
+
+  // Optimize dependency pre-bundling
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', 'axios', 'zustand', 'i18next', 'react-i18next']
   }
 })

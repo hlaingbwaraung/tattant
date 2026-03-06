@@ -28,6 +28,7 @@ const ShopOwnerRequest = require('./ShopOwnerRequest')
 const MenuItem      = require('./MenuItem')
 const ContactMessage = require('./ContactMessage')
 const SiteVisit     = require('./SiteVisit')
+const SiteSetting   = require('./SiteSetting')
 
 /* ============================
  *  Category ↔ Business
@@ -144,5 +145,6 @@ module.exports = {
   ShopOwnerRequest,
   MenuItem,
   ContactMessage,
-  SiteVisit
+  SiteVisit,
+  SiteSetting
 }

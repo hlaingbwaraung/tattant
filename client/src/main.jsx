@@ -17,7 +17,7 @@ import './style.css'
 
 createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <BrowserRouter basename="/tattant">
+        <BrowserRouter>
             <App />
         </BrowserRouter>
     </React.StrictMode>
