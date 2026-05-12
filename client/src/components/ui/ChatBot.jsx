@@ -1,11 +1,11 @@
 /**
  * ChatBot – AI-Powered Multilingual Assistant
  *
- * A floating chatbot that uses Google Gemini AI to answer any question
+ * A floating chatbot that uses the backend AI service to answer questions
  * about Japan travel, Tattant services, or general knowledge.
  *
  * Features:
- *   - AI-powered responses via server API (Google Gemini)
+ *   - AI-powered responses via server API
  *   - Graceful fallback to local keyword-matching when API unavailable
  *   - Conversation history (context-aware follow-ups)
  *   - Quick-reply suggestions that update contextually
@@ -185,6 +185,26 @@ function findLocalAnswer (input, lang) {
   return null
 }
 
+function buildOfflineReply (input, lang, aiError) {
+  const hasBillingIssue = /credit|billing|depleted/i.test(aiError || '')
+
+  if (lang === 'ja') {
+    return hasBillingIssue
+      ? '現在、ライブAIの利用枠が不足しているため、一般質問への回答を生成できません。管理者がAIクレジットまたはAPIキーを更新すると、また何でも質問できるようになります。それまでは、Tattantの使い方・予約・お気に入り・ポイント・ショップオーナー機能などは案内できます。'
+      : '現在ライブAIに接続できません。Tattantの機能、日本旅行、予約、ポイント、プロフィール設定などのローカル知識なら案内できます。少し後でもう一度お試しください。'
+  }
+
+  if (lang === 'my') {
+    return hasBillingIssue
+      ? 'လက်ရှိ Live AI အသုံးပြုရန် credit မလုံလောက်သေးတဲ့အတွက် အထွေထွေမေးခွန်းတွေကို AI နဲ့ မဖြေကြားနိုင်သေးပါ။ Admin က AI credit သို့မဟုတ် API key ကို ပြန်ပြင်ပြီးတာနဲ့ မေးခွန်းမျိုးစုံကို ပြန်ဖြေနိုင်ပါမယ်။ အခုချိန်မှာတော့ Tattant အသုံးပြုပုံ၊ booking၊ favorites၊ points နဲ့ shop owner feature တွေကို ကူညီရှင်းပြနိုင်ပါတယ်။'
+      : 'လက်ရှိ Live AI နဲ့ ချိတ်ဆက်မရသေးပါ။ Tattant feature တွေ၊ ဂျပန်ခရီးသွားအကြံပြုချက်တွေ၊ booking၊ points နဲ့ profile setting အကြောင်းတွေကိုတော့ local knowledge နဲ့ ကူညီနိုင်ပါတယ်။ ခဏနေပြီး ထပ်မေးကြည့်ပါ။'
+  }
+
+  return hasBillingIssue
+    ? 'Live AI is currently out of credits, so I cannot generate full answers to arbitrary questions yet. Once the admin adds AI credits or updates the API key, I will answer general questions normally. Until then, I can still help with Tattant features like bookings, favorites, points, profile settings, premium, and shop owner tools.'
+    : 'Live AI is temporarily unavailable. I can still help with Tattant features, Japan travel basics, bookings, points, favorites, and account settings from local knowledge. Please try the general question again in a moment.'
+}
+
 /* =========================================================
  *  Contextual follow-up suggestions
  * ========================================================= */
@@ -330,6 +350,7 @@ export default function ChatBot () {
   const [hasGreeted, setHasGreeted] = useState({})
   const [aiAvailable, setAiAvailable] = useState(true)
   const [suggestions, setSuggestions] = useState([])
+  const aiErrorRef = useRef('')
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -366,11 +387,13 @@ export default function ChatBot () {
 
       if (res.data.success) {
         setAiAvailable(true)
+        aiErrorRef.current = ''
         return res.data.data.reply
       }
 
       if (res.data.fallback) {
         setAiAvailable(false)
+        aiErrorRef.current = res.data.error || ''
         return null
       }
 
@@ -378,6 +401,7 @@ export default function ChatBot () {
     } catch (err) {
       console.warn('ChatBot AI unavailable:', err.message)
       setAiAvailable(false)
+      aiErrorRef.current = err.response?.data?.error || err.message || ''
       return null
     }
   }, [lang])
@@ -396,9 +420,7 @@ export default function ChatBot () {
     const allMessages = [...messages, userMsg]
     let reply = null
 
-    if (aiAvailable) {
-      reply = await sendToAI(trimmed, allMessages)
-    }
+    reply = await sendToAI(trimmed, allMessages)
 
     // Fallback to local KB
     if (!reply) {
@@ -407,8 +429,7 @@ export default function ChatBot () {
 
     // Ultimate fallback
     if (!reply) {
-      const kb = KB[lang] || KB.en
-      reply = aiAvailable ? kb.fallback : kb.offline
+      reply = buildOfflineReply(trimmed, lang, aiErrorRef.current)
     }
 
     setIsTyping(false)
@@ -475,7 +496,7 @@ export default function ChatBot () {
                 <span className="chatbot-status">
                   <span className={`status-dot ${aiAvailable ? 'online' : 'limited'}`} />
                   {aiAvailable
-                    ? (lang === 'ja' ? 'AI搭載' : lang === 'my' ? 'AI စွမ်းအင်' : 'AI Powered')
+                    ? (lang === 'ja' ? 'オンライン' : lang === 'my' ? 'အဆင်သင့်' : 'Ready')
                     : (lang === 'ja' ? 'オフライン' : lang === 'my' ? 'အော့ဖ်လိုင်း' : 'Offline Mode')
                   }
                 </span>
@@ -560,10 +581,6 @@ export default function ChatBot () {
             </button>
           </div>
 
-          {/* AI Badge */}
-          <div className="chatbot-ai-badge">
-            Powered by Gemini AI ✨
-          </div>
         </div>
       )}
     </>

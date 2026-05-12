@@ -6,6 +6,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useAuthStore from '../store/useAuthStore'
 import { useGoogleAuth } from '../hooks/useGoogleAuth'
+import TattantLogo from '../components/brand/TattantLogo'
 import './LoginPage.css'
 
 export default function LoginPage() {
@@ -78,7 +79,7 @@ export default function LoginPage() {
             <div className="auth-container">
                 {/* Left Side - Branding */}
                 <div className="auth-branding">
-                    <Link to="/" className="brand-logo">🎌 Tattant</Link>
+                    <Link to="/" className="brand-logo"><TattantLogo /></Link>
                     <h1 className="brand-title">{t('auth.welcomeBack')}</h1>
                     <p className="brand-subtitle">{t('auth.signInSubtitle')}</p>
                     <div className="brand-features">

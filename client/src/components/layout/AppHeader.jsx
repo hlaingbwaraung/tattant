@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import useAuthStore from '../../store/useAuthStore'
 import useThemeStore from '../../store/useThemeStore'
 import { getSetting } from '../../services/settingsService'
+import TattantLogo from '../brand/TattantLogo'
 import './AppHeader.css'
 
 export default function AppHeader() {
@@ -92,8 +93,7 @@ export default function AppHeader() {
         <header className="header">
             <div className="header-container">
                 <Link to="/" className="logo">
-                    <span className="logo-icon">🎌</span>
-                    <span className="logo-text">Tattant</span>
+                    <TattantLogo />
                 </Link>
 
                 <nav className={`nav ${mobileMenuOpen ? 'open' : ''}`}>
@@ -125,13 +125,14 @@ export default function AppHeader() {
                     </div>}
 
                     <Link to="/about-japan" className={`nav-link desktop-nav ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.about')}</Link>
+                    <Link to="/learn-japanese" className={`nav-link desktop-nav ${isActive('/learn-japanese') ? 'active' : ''}`} onClick={closeMobile}>{t('nav.learnJapanese')}</Link>
 
                     {/* Mobile drawer content */}
                     {mobileMenuOpen && (
                         <div className="mobile-drawer-content">
                             {/* Drawer header */}
                             <div className="mobile-drawer-header">
-                                <span className="mobile-drawer-logo">🎌 Tattant</span>
+                                <TattantLogo className="mobile-drawer-logo" />
                                 {isAuthenticated && (
                                     <div className="mobile-user-info">
                                         <span className="mobile-user-avatar">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
@@ -165,6 +166,9 @@ export default function AppHeader() {
 
                                 <Link to="/about-japan" className={`mobile-nav-item ${isActive('/about-japan') ? 'active' : ''}`} onClick={closeMobile}>
                                     <span className="mobile-nav-icon">🗾</span> {t('nav.about')}
+                                </Link>
+                                <Link to="/learn-japanese" className={`mobile-nav-item ${isActive('/learn-japanese') ? 'active' : ''}`} onClick={closeMobile}>
+                                    <span className="mobile-nav-icon">📚</span> {t('nav.learnJapanese')}
                                 </Link>
                             </div>
 

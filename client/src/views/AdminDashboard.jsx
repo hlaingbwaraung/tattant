@@ -512,7 +512,7 @@ export default function AdminDashboard() {
             const msg = err.response?.data?.error || err.message || 'Search failed'
             const isQuota = msg.toLowerCase().includes('quota') || msg.includes('429') || msg.includes('rate')
             const displayMsg = isQuota
-                ? '⚠️ Gemini API quota exhausted. The bot will auto-retry with fallback models. If this persists, wait a few minutes or upgrade your plan at https://ai.google.dev/pricing'
+                ? '⚠️ AI quota exhausted. The bot will auto-retry with fallback models. If this persists, wait a few minutes or update your AI billing/API key.'
                 : msg
             setAiError(displayMsg)
             addSearchLog(`❌ Error: ${displayMsg}`, 'error')
@@ -1076,6 +1076,21 @@ export default function AdminDashboard() {
                                         <span className="toggle-label">{siteSettings.feature_jobs?.enabled ? 'ON' : 'OFF'}</span>
                                     </button>
                                 </div>
+
+                                {/* Free Japanese Learning Toggle */}
+                                <div className="setting-item">
+                                    <div className="setting-info">
+                                        <div className="setting-label">📚 Free Japanese Learning</div>
+                                        <div className="setting-desc">When ON, the Japanese Learning page (JLPT Quiz) is free for all users — no premium required.</div>
+                                    </div>
+                                    <button
+                                        className={`setting-toggle ${siteSettings.feature_free_japanese?.enabled ? 'toggle-on' : 'toggle-off'}`}
+                                        onClick={() => toggleFeatureFlag('feature_free_japanese')}
+                                    >
+                                        <span className="toggle-knob" />
+                                        <span className="toggle-label">{siteSettings.feature_free_japanese?.enabled ? 'ON' : 'OFF'}</span>
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -1088,7 +1103,7 @@ export default function AdminDashboard() {
                         <div className="section-card ai-search-panel">
                             <div className="section-header">
                                 <h2>🤖 AI Deep Search Bot</h2>
-                                <span className="ai-badge">Powered by Gemini AI</span>
+                                <span className="ai-badge">Smart AI Search</span>
                             </div>
                             <p className="ai-subtitle">Deep dive into Facebook, Google Maps, Tabelog & community forums to find Burmese restaurants in Japan and auto-add them to your shops.</p>
 

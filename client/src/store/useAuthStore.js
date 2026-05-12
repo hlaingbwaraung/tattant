@@ -15,11 +15,18 @@ import {
 } from '../services/authService'
 
 const useAuthStore = create((set, get) => {
-    const storedUser = localStorage.getItem('user')
+    let parsedUser = null
+    try {
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) parsedUser = JSON.parse(storedUser)
+    } catch {
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')
+    }
 
     return {
         /* ---------- State ---------- */
-        user: storedUser ? JSON.parse(storedUser) : null,
+        user: parsedUser,
         token: localStorage.getItem('token') || null,
         loading: false,
         error: null,

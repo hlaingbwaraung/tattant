@@ -10,6 +10,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import useAuthStore from '../store/useAuthStore'
+import TattantLogo from '../components/brand/TattantLogo'
 
 /* ============================
  *  Lazy-loaded Views
@@ -56,12 +57,12 @@ function LoadingFallback() {
             alignItems: 'center',
             justifyContent: 'center',
             minHeight: '100vh',
-            background: 'var(--bg-primary)',
-            color: 'var(--text-secondary)'
+            background: '#f8f6f1',
+            color: '#555555'
         }}>
             <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎌</div>
-                <div>Loading...</div>
+                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}><TattantLogo markOnly /></div>
+                <div style={{ fontSize: '1.125rem' }}>Loading...</div>
             </div>
         </div>
     )
@@ -86,17 +87,17 @@ class ErrorBoundary extends React.Component {
             return (
                 <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)',
-                    fontFamily: 'var(--font-sans)'
+                    minHeight: '100vh', background: '#f8f6f1', color: '#1a1a1a',
+                    fontFamily: 'Inter, system-ui, sans-serif'
                 }}>
                     <div style={{ textAlign: 'center', padding: '2rem' }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>😵</div>
                         <h2 style={{ marginBottom: '0.5rem' }}>Something went wrong</h2>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>An unexpected error occurred.</p>
+                        <p style={{ color: '#555', marginBottom: '1.5rem' }}>An unexpected error occurred.</p>
                         <button
-                            onClick={() => { this.setState({ hasError: false }); window.location.href = '/tattant/' }}
+                            onClick={() => { this.setState({ hasError: false }); window.location.href = '/' }}
                             style={{
-                                padding: '0.75rem 2rem', background: 'var(--color-primary)',
+                                padding: '0.75rem 2rem', background: '#b8860b',
                                 color: '#fff', border: 'none', borderRadius: '8px',
                                 cursor: 'pointer', fontSize: '1rem'
                             }}

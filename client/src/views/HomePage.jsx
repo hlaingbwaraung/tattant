@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useAuthStore from '../store/useAuthStore'
 import AppHeader from '../components/layout/AppHeader'
+import TattantLogo from '../components/brand/TattantLogo'
 import './HomePage.css'
 
 export default function HomePage() {
@@ -168,7 +169,7 @@ export default function HomePage() {
                 <div className="section-container">
                     <div className="footer-grid">
                         <div className="footer-brand">
-                            <div className="footer-logo">🎌 Tattant</div>
+                            <div className="footer-logo"><TattantLogo /></div>
                             <p className="footer-tagline">{t('footer.tagline')}</p>
                         </div>
                         <div className="footer-links">

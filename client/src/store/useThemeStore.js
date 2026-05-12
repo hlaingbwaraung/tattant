@@ -16,7 +16,8 @@ const applyTheme = (dark) => {
 }
 
 const useThemeStore = create((set, get) => {
-    const savedTheme = localStorage.getItem('theme') || 'light'
+    let savedTheme = 'light'
+    try { savedTheme = localStorage.getItem('theme') || 'light' } catch { /* private browsing */ }
     const initialDark = savedTheme === 'dark'
 
     // Apply immediately on store creation

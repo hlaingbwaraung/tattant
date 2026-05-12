@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import useAuthStore from '../store/useAuthStore'
 import { useGoogleAuth } from '../hooks/useGoogleAuth'
 import { submitShopOwnerRequest } from '../services/shopOwnerRequestService'
+import TattantLogo from '../components/brand/TattantLogo'
 import './RegisterPage.css'
 
 export default function RegisterPage() {
@@ -114,7 +115,7 @@ export default function RegisterPage() {
         <div className="auth-page">
             <div className="auth-container">
                 <div className="auth-branding">
-                    <Link to="/" className="brand-logo">🎌 Tattant</Link>
+                    <Link to="/" className="brand-logo"><TattantLogo /></Link>
                     <h1 className="brand-title">{t('auth.joinTitle')}</h1>
                     <p className="brand-subtitle">{t('auth.joinSubtitle')}</p>
                     <div className="brand-features">

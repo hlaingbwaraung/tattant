@@ -16,6 +16,7 @@ dist/
 build/
 client/dist/
 server/dist/
+.vite/
 
 # IDE
 .vscode/
@@ -33,6 +34,8 @@ logs/
 *.sql
 *.sqlite
 *.db
+.local-pg-data/
+.local-pg.log
 
 # OS
 Thumbs.db

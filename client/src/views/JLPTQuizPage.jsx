@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import useAuthStore from '../store/useAuthStore'
 import api from '../services/api'
 import { searchDictionary } from '../services/dictionaryService'
+import { getSetting } from '../services/settingsService'
 import AppHeader from '../components/layout/AppHeader'
 import { kanjiByLevel, similarKanjiByLevel, grammarByLevel } from './jlptQuizData'
 import './JLPTQuizPage.css'
@@ -31,7 +32,13 @@ export default function JLPTQuizPage() {
     const user = useAuthStore(s => s.user)
 
     /* ---------- Access Control ---------- */
-    const isPremiumUser = user?.is_premium || user?.is_admin
+    const [freeForAll, setFreeForAll] = useState(false)
+    useEffect(() => {
+        getSetting('feature_free_japanese')
+            .then(res => setFreeForAll(res.data?.data?.enabled || false))
+            .catch(() => setFreeForAll(false))
+    }, [])
+    const isPremiumUser = freeForAll || user?.is_premium || user?.is_admin
 
     /* ---------- Tab & Level ---------- */
     const [activeTab, setActiveTab] = useState('quiz')
@@ -127,6 +134,12 @@ export default function JLPTQuizPage() {
             clearInterval(grammarTimerRef.current)
         }
     }, [])
+
+    /* ---------- Sound effects (placeholder) ---------- */
+    function playSound(type) {
+        // Future: new Audio(`/sounds/${type}.mp3`).play()
+        console.log(`🔊 Sound: ${type}`)
+    }
 
     /* ==========================================
      * KANJI READING QUIZ

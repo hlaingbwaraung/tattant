@@ -26,23 +26,12 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
   text-decoration: none;
   transition: transform var(--transition-fast);
   z-index: 102;
+  font-size: 1.625rem;
 }
 .logo:hover { transform: scale(1.03); }
-.logo-icon { font-size: 1.625rem; filter: drop-shadow(0 2px 4px rgba(184, 134, 11, 0.3)); }
-.logo-text {
-  font-family: var(--font-display);
-  font-size: 1.625rem;
-  font-weight: 700;
-  background: var(--color-primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 0.02em;
-}
 
 .nav { display: flex; gap: 0.125rem; align-items: center; }
 
@@ -406,10 +395,7 @@
     border-bottom: 1px solid rgba(184, 134, 11, 0.2);
   }
   .mobile-drawer-logo {
-    font-family: var(--font-display); font-size: 1.5rem; font-weight: 700;
-    background: var(--color-primary-gradient); -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; background-clip: text;
-    display: block; margin-bottom: 1rem;
+    display: inline-flex; margin-bottom: 1rem; font-size: 1.5rem;
   }
   .mobile-user-info {
     display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem;
@@ -499,7 +485,7 @@
 }
 
 @media (max-width: 480px) {
-  .logo-text { font-size: 1.25rem; }
+  .logo { font-size: 1.25rem; }
   .theme-toggle { width: 36px; height: 36px; }
   .lang-toggle { padding: 0.4rem 0.5rem; }
 }

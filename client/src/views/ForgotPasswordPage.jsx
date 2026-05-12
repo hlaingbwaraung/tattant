@@ -8,6 +8,8 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { forgotPassword, verifyOtp, resetPassword } from '../services/authService'
+import TattantLogo from '../components/brand/TattantLogo'
+import './LoginPage.css'
 import './ForgotPasswordPage.css'
 
 export default function ForgotPasswordPage() {
@@ -156,7 +158,7 @@ export default function ForgotPasswordPage() {
             <div className="auth-container">
                 {/* Left Side - Branding */}
                 <div className="auth-branding">
-                    <Link to="/" className="brand-logo">🎌 Tattant</Link>
+                    <Link to="/" className="brand-logo"><TattantLogo /></Link>
                     <h1 className="brand-title">Reset Your Password</h1>
                     <p className="brand-subtitle">We'll send a verification code to your email to help you regain access.</p>
                     <div className="brand-features">
