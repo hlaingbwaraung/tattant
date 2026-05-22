@@ -1,0 +1,44 @@
+{
+  "name": "Tattant Control",
+  "short_name": "Tattant",
+  "description": "Mobile admin control panel for Tattant.",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8f6f1",
+  "theme_color": "#b8860b",
+  "categories": ["business", "productivity", "travel"],
+  "icons": [
+    {
+      "src": "/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Admin Control",
+      "short_name": "Admin",
+      "url": "/admin"
+    },
+    {
+      "name": "Site Status",
+      "short_name": "Status",
+      "url": "/admin"
+    }
+  ]
+}

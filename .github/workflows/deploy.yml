@@ -1,75 +1,40 @@
-name: Deploy Tattant to EC2
+name: Validate Tattant
 
 on:
   push:
     branches: ['main']
+  pull_request:
+    branches: ['main']
   workflow_dispatch:
 
 concurrency:
-  group: 'deploy'
+  group: validate-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node for client
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-          cache-dependency-path: client/package-lock.json
+
+      - name: Install server dependencies
+        run: npm --prefix server ci
 
       - name: Install client dependencies
-        run: cd client && npm ci
+        run: npm --prefix client ci
 
       - name: Build client
-        run: cd client && npm run build
+        run: npm --prefix client run build
         env:
           VITE_API_URL: /api
-          VITE_GOOGLE_CLIENT_ID: 42655523729-p7n6gum8okmufu3tj6abb7b6olenvdsm.apps.googleusercontent.com
 
-      - name: Deploy client to EC2
-        uses: easingthemes/ssh-deploy@main
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.EC2_HOST }}
-          REMOTE_USER: ${{ secrets.EC2_USER }}
-          SOURCE: client/dist/
-          TARGET: /var/www/tattant/
-          ARGS: -rlgoDzvc -i --delete
-
-      - name: Deploy server to EC2
-        uses: easingthemes/ssh-deploy@main
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.EC2_HOST }}
-          REMOTE_USER: ${{ secrets.EC2_USER }}
-          SOURCE: server/
-          TARGET: /opt/tattant-server/
-          EXCLUDE: node_modules/, .env, npm-debug.log
-          ARGS: -rlgoDzvc -i
-
-      - name: Install, migrate, and restart server on EC2
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
-            cd /opt/tattant-server
-            npm ci --omit=dev
-            set -a
-            . ./.env
-            set +a
-            NODE_ENV=production npx sequelize-cli db:migrate
-            pm2 restart tattant-server || pm2 start src/server.js --name tattant-server
-            pm2 save
-
-      - name: Verify live site
+      - name: Deployment note
         run: |
-          curl --fail --silent --show-error https://tattant.com/health
+          echo "Render deploys production from render.yaml."
+          echo "AWS/EC2 deployment is intentionally disabled."

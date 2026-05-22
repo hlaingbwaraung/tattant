@@ -23,6 +23,13 @@ const shopCategoryPresets = [
     { slug: 'travel', name_en: 'Travel', name_my: 'Travel', icon: '✈️' }
 ]
 
+const controlNotes = [
+    'Live domain: tattant.com on Render',
+    'Database: Render Postgres tattant-db',
+    'DNS: root A record 216.24.57.1, www CNAME tattant.onrender.com',
+    'AWS/EC2 is retired for this project'
+]
+
 export default function AdminDashboard() {
     const navigate = useNavigate()
     const { i18n } = useTranslation()
@@ -30,7 +37,8 @@ export default function AdminDashboard() {
     const currentLocale = i18n.language
     const currentUserId = user?.id
 
-    const [activeTab, setActiveTab] = useState('users')
+    const [activeTab, setActiveTab] = useState('overview')
+    const [systemStatus, setSystemStatus] = useState({ state: 'checking', message: 'Checking site status...', checkedAt: null })
 
     // Site Settings (feature flags)
     const [siteSettings, setSiteSettings] = useState({})
@@ -125,6 +133,31 @@ export default function AdminDashboard() {
     const [visitDays, setVisitDays] = useState(30)
 
     const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+
+    const refreshSystemStatus = useCallback(async () => {
+        try {
+            const response = await fetch('/health', { cache: 'no-store' })
+            if (!response.ok) throw new Error(`Health check failed: ${response.status}`)
+            const data = await response.json()
+            setSystemStatus({
+                state: 'online',
+                message: data.message || 'Server is running',
+                checkedAt: new Date()
+            })
+        } catch (err) {
+            setSystemStatus({
+                state: 'offline',
+                message: err.message || 'Health check failed',
+                checkedAt: new Date()
+            })
+        }
+    }, [])
+
+    useEffect(() => {
+        refreshSystemStatus()
+        const timer = window.setInterval(refreshSystemStatus, 60000)
+        return () => window.clearInterval(timer)
+    }, [refreshSystemStatus])
 
     // ========== USER MANAGEMENT ==========
     const loadData = useCallback(async () => {
@@ -400,7 +433,7 @@ export default function AdminDashboard() {
     useEffect(() => { if (activeTab === 'blogs') loadBlogs() }, [activeTab, loadBlogs])
     useEffect(() => { if (activeTab === 'categories') loadCategories() }, [activeTab, loadCategories])
     useEffect(() => { if (activeTab === 'shops') loadShops() }, [activeTab, loadShops])
-    useEffect(() => { if (activeTab === 'requests') loadRequests() }, [activeTab, loadRequests])
+    useEffect(() => { if (activeTab === 'overview' || activeTab === 'requests') loadRequests() }, [activeTab, loadRequests])
 
     // ========== CONTACT MESSAGES ==========
     const loadContacts = useCallback(async () => {
@@ -437,7 +470,7 @@ export default function AdminDashboard() {
         } catch { alert('Failed to delete message') }
     }
 
-    useEffect(() => { if (activeTab === 'contacts') loadContacts() }, [activeTab, loadContacts])
+    useEffect(() => { if (activeTab === 'overview' || activeTab === 'contacts') loadContacts() }, [activeTab, loadContacts])
 
     // ========== SITE ANALYTICS ==========
     const loadVisitStats = useCallback(async () => {
@@ -592,7 +625,22 @@ export default function AdminDashboard() {
             <div className="admin-container"><div className="container">
                 <div className="page-header"><h1>👨‍💼 Admin Dashboard</h1><p className="subtitle">Manage Users, Blogs & Statistics</p></div>
 
+                <div className="control-mobile-summary">
+                    <div>
+                        <span className="control-kicker">Tattant Control</span>
+                        <strong>Phone-ready admin panel</strong>
+                    </div>
+                    <span className={`control-live-pill ${systemStatus.state}`}>
+                        <span className="control-live-dot" />
+                        {systemStatus.state === 'online' ? 'Live' : systemStatus.state === 'offline' ? 'Check' : 'Checking'}
+                    </span>
+                </div>
+
                 <div className="tab-nav">
+                    <button className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+                        <span className="tab-icon">CTRL</span>
+                        <span className="tab-label">Control</span>
+                    </button>
                     {['users', 'blogs', 'categories', 'shops', 'requests', 'contacts', 'analytics', 'ai-search', 'settings'].map(tab => (
                         <button key={tab} className={`tab-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
                             {tab === 'users' ? '👥' : tab === 'blogs' ? '📝' : tab === 'categories' ? '📂' : tab === 'shops' ? '🏪' : tab === 'requests' ? '📋' : tab === 'contacts' ? '📩' : tab === 'analytics' ? '📊' : tab === 'ai-search' ? '🤖' : '⚙️'} {tab === 'ai-search' ? 'AI Search' : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -601,6 +649,58 @@ export default function AdminDashboard() {
                         </button>
                     ))}
                 </div>
+
+                {/* ===== CONTROL HOME ===== */}
+                {activeTab === 'overview' && (
+                    <div className="control-home">
+                        <section className="control-status-grid">
+                            <article className={`control-card control-status-${systemStatus.state}`}>
+                                <span className="control-card-label">Site status</span>
+                                <strong>{systemStatus.state === 'online' ? 'Online' : systemStatus.state === 'offline' ? 'Needs attention' : 'Checking'}</strong>
+                                <p>{systemStatus.message}</p>
+                                {systemStatus.checkedAt && <small>Checked {systemStatus.checkedAt.toLocaleTimeString()}</small>}
+                                <button type="button" className="control-card-action" onClick={refreshSystemStatus}>Refresh</button>
+                            </article>
+                            <article className="control-card">
+                                <span className="control-card-label">Users</span>
+                                <strong>{stats?.totalUsers ?? users.length}</strong>
+                                <p>{stats?.adminUsers ?? 0} admins, {stats?.premiumUsers ?? 0} premium users.</p>
+                                <button type="button" className="control-card-action" onClick={() => setActiveTab('users')}>Manage users</button>
+                            </article>
+                            <article className="control-card control-card-warning">
+                                <span className="control-card-label">Render database</span>
+                                <strong>Free plan warning</strong>
+                                <p>Free Postgres expires around Jun 21-22, 2026 unless upgraded.</p>
+                                <button type="button" className="control-card-action" onClick={() => setActiveTab('settings')}>View settings</button>
+                            </article>
+                        </section>
+
+                        <section className="control-quick-actions">
+                            <div className="section-header">
+                                <h2>Quick actions</h2>
+                                <span className="control-subtle">Optimized for phone control</span>
+                            </div>
+                            <div className="control-action-grid">
+                                <button type="button" onClick={() => setActiveTab('shops')}>Manage shops</button>
+                                <button type="button" onClick={() => setActiveTab('requests')}>Review requests {requestCounts.pending > 0 ? `(${requestCounts.pending})` : ''}</button>
+                                <button type="button" onClick={() => setActiveTab('contacts')}>Messages {contactCounts.unread > 0 ? `(${contactCounts.unread})` : ''}</button>
+                                <button type="button" onClick={() => setActiveTab('analytics')}>View analytics</button>
+                                <button type="button" onClick={() => setActiveTab('blogs')}>Edit blogs</button>
+                                <button type="button" onClick={() => setActiveTab('categories')}>Categories</button>
+                            </div>
+                        </section>
+
+                        <section className="control-notes">
+                            <div className="section-header">
+                                <h2>Production notes</h2>
+                                <span className="control-subtle">Saved in CODEX_PROJECT_STATE.md</span>
+                            </div>
+                            <ul>
+                                {controlNotes.map(note => <li key={note}>{note}</li>)}
+                            </ul>
+                        </section>
+                    </div>
+                )}
 
                 {/* ===== USERS TAB ===== */}
                 {activeTab === 'users' && (<>

@@ -47,6 +47,21 @@ function ProtectedRoute({ children }) {
     return children
 }
 
+function AdminRoute({ children }) {
+    const token = useAuthStore(state => state.token)
+    const user = useAuthStore(state => state.user)
+
+    if (!token) {
+        return <Navigate to="/login" replace />
+    }
+
+    if (!user?.is_admin) {
+        return <Navigate to="/dashboard" replace />
+    }
+
+    return children
+}
+
 /* ============================
  *  Loading Fallback
  * ============================ */
@@ -136,7 +151,7 @@ export default function AppRoutes() {
 
                 {/* --- Auth-protected pages --- */}
                 <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
-                <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                 <Route path="/shop-owner" element={<ProtectedRoute><ShopOwnerDashboard /></ProtectedRoute>} />
                 <Route path="/favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
                 <Route path="/profile/settings" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
