@@ -181,7 +181,7 @@ onBeforeUnmount(() => {
 const loadBlogs = async () => {
   try {
     loading.value = true
-    const response = await axios.get('http://localhost:5000/api/blogs', {
+    const response = await axios.get('/api/blogs', {
       params: { published: true }
     })
     

@@ -250,7 +250,7 @@ onMounted(async () => {
   const id = route.params.id
 
   try {
-    const response = await axios.get(`http://localhost:5000/api/businesses/${id}`)
+    const response = await axios.get(`/api/businesses/${id}`)
     business.value = response.data
 
     if (isAuthenticated.value) {

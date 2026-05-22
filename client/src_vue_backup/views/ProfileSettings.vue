@@ -198,7 +198,7 @@ const updateProfile = async () => {
   try {
     const token = localStorage.getItem('token')
     const response = await axios.put(
-      'http://localhost:5000/api/auth/profile',
+      '/api/auth/profile',
       {
         name: profileForm.value.name,
         email: profileForm.value.email
@@ -249,7 +249,7 @@ const updatePassword = async () => {
   try {
     const token = localStorage.getItem('token')
     await axios.put(
-      'http://localhost:5000/api/auth/password',
+      '/api/auth/password',
       {
         currentPassword: passwordForm.value.currentPassword,
         newPassword: passwordForm.value.newPassword
@@ -286,7 +286,7 @@ const confirmDeleteAccount = () => {
 const deleteAccount = async () => {
   try {
     const token = localStorage.getItem('token')
-    await axios.delete('http://localhost:5000/api/auth/account', {
+    await axios.delete('/api/auth/account', {
       headers: { Authorization: `Bearer ${token}` }
     })
     

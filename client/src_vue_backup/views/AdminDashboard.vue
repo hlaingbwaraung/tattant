@@ -860,8 +860,8 @@ const loadData = async () => {
     const headers = { Authorization: `Bearer ${token}` }
 
     const [usersRes, statsRes] = await Promise.all([
-      axios.get('http://localhost:5000/api/admin/users', { headers }),
-      axios.get('http://localhost:5000/api/admin/stats', { headers })
+      axios.get('/api/admin/users', { headers }),
+      axios.get('/api/admin/stats', { headers })
     ])
 
     users.value = usersRes.data.users
@@ -883,7 +883,7 @@ const toggleAdmin = async (user) => {
   try {
     const token = localStorage.getItem('token')
     await axios.patch(
-      `http://localhost:5000/api/admin/users/${user.id}/admin`,
+      `/api/admin/users/${user.id}/admin`,
       { is_admin: !user.is_admin },
       { headers: { Authorization: `Bearer ${token}` } }
     )
@@ -900,7 +900,7 @@ const togglePremium = async (user) => {
   try {
     const token = localStorage.getItem('token')
     await axios.patch(
-      `http://localhost:5000/api/admin/users/${user.id}/premium`,
+      `/api/admin/users/${user.id}/premium`,
       { is_premium: !user.is_premium, premium_type: user.is_premium ? null : 'lifetime' },
       { headers: { Authorization: `Bearer ${token}` } }
     )
@@ -926,7 +926,7 @@ const deleteUser = async () => {
   try {
     const token = localStorage.getItem('token')
     await axios.delete(
-      `http://localhost:5000/api/admin/users/${deleteModal.value.user.id}`,
+      `/api/admin/users/${deleteModal.value.user.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     )
 
@@ -948,8 +948,8 @@ const loadBlogs = async () => {
     const headers = { Authorization: `Bearer ${token}` }
 
     const [blogsRes, statsRes] = await Promise.all([
-      axios.get('http://localhost:5000/api/blogs', { headers }),
-      axios.get('http://localhost:5000/api/blogs/admin/stats', { headers })
+      axios.get('/api/blogs', { headers }),
+      axios.get('/api/blogs/admin/stats', { headers })
     ])
 
     blogs.value = blogsRes.data.data
@@ -1012,14 +1012,14 @@ const saveBlog = async () => {
     if (blogFormModal.value.blog) {
       // Update existing blog
       await axios.put(
-        `http://localhost:5000/api/blogs/${blogFormModal.value.blog.id}`,
+        `/api/blogs/${blogFormModal.value.blog.id}`,
         blogForm.value,
         { headers }
       )
     } else {
       // Create new blog
       await axios.post(
-        'http://localhost:5000/api/blogs',
+        '/api/blogs',
         blogForm.value,
         { headers }
       )
@@ -1043,7 +1043,7 @@ const deleteBlog = async () => {
   try {
     const token = localStorage.getItem('token')
     await axios.delete(
-      `http://localhost:5000/api/blogs/${deleteBlogModal.value.blog.id}`,
+      `/api/blogs/${deleteBlogModal.value.blog.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     )
 
@@ -1068,8 +1068,8 @@ const loadCategories = async () => {
     const headers = { Authorization: `Bearer ${token}` }
 
     const [catsRes, statsRes] = await Promise.all([
-      axios.get('http://localhost:5000/api/categories', { headers }),
-      axios.get('http://localhost:5000/api/categories/admin/stats', { headers })
+      axios.get('/api/categories', { headers }),
+      axios.get('/api/categories/admin/stats', { headers })
     ])
 
     categories.value = catsRes.data.categories
@@ -1115,13 +1115,13 @@ const saveCategory = async () => {
 
     if (categoryFormModal.value.category) {
       await axios.put(
-        `http://localhost:5000/api/categories/${categoryFormModal.value.category.id}`,
+        `/api/categories/${categoryFormModal.value.category.id}`,
         categoryForm.value,
         { headers }
       )
     } else {
       await axios.post(
-        'http://localhost:5000/api/categories',
+        '/api/categories',
         categoryForm.value,
         { headers }
       )
@@ -1145,7 +1145,7 @@ const deleteCategory = async () => {
   try {
     const token = localStorage.getItem('token')
     await axios.delete(
-      `http://localhost:5000/api/categories/${deleteCategoryModal.value.category.id}`,
+      `/api/categories/${deleteCategoryModal.value.category.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     )
     deleteCategoryModal.value.show = false
@@ -1165,8 +1165,8 @@ const loadShops = async () => {
     const headers = { Authorization: `Bearer ${token}` }
 
     const [shopsRes, statsRes] = await Promise.all([
-      axios.get('http://localhost:5000/api/businesses?all=true', { headers }),
-      axios.get('http://localhost:5000/api/businesses/admin/stats', { headers })
+      axios.get('/api/businesses?all=true', { headers }),
+      axios.get('/api/businesses/admin/stats', { headers })
     ])
 
     shops.value = shopsRes.data.businesses
@@ -1244,13 +1244,13 @@ const saveShop = async () => {
 
     if (shopFormModal.value.shop) {
       await axios.put(
-        `http://localhost:5000/api/businesses/${shopFormModal.value.shop.id}`,
+        `/api/businesses/${shopFormModal.value.shop.id}`,
         payload,
         { headers }
       )
     } else {
       await axios.post(
-        'http://localhost:5000/api/businesses',
+        '/api/businesses',
         payload,
         { headers }
       )
@@ -1274,7 +1274,7 @@ const deleteShop = async () => {
   try {
     const token = localStorage.getItem('token')
     await axios.delete(
-      `http://localhost:5000/api/businesses/${deleteShopModal.value.shop.id}`,
+      `/api/businesses/${deleteShopModal.value.shop.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     )
     deleteShopModal.value.show = false
@@ -1289,7 +1289,7 @@ const toggleShopActive = async (shop) => {
   try {
     const token = localStorage.getItem('token')
     await axios.patch(
-      `http://localhost:5000/api/businesses/${shop.id}/toggle-active`,
+      `/api/businesses/${shop.id}/toggle-active`,
       {},
       { headers: { Authorization: `Bearer ${token}` } }
     )

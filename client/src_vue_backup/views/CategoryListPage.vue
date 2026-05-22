@@ -121,7 +121,7 @@ onMounted(async () => {
   categoryDescription.value = category.description
 
   try {
-    const response = await axios.get(`http://localhost:5000/api/businesses?category=${slug}`)
+    const response = await axios.get(`/api/businesses?category=${slug}`)
     businesses.value = response.data.businesses || response.data
   } catch (err) {
     error.value = 'Failed to load businesses. Please try again later.'

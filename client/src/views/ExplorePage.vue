@@ -119,11 +119,11 @@ const loading    = ref(true)
 onMounted(async () => {
   try {
     /* 1. Fetch categories */
-    const catRes = await axios.get('http://localhost:5000/api/categories')
+    const catRes = await axios.get('/api/categories')
     const cats = catRes.data.categories || catRes.data || []
 
     /* 2. Fetch all businesses for per-category counts */
-    const bizRes = await axios.get('http://localhost:5000/api/businesses')
+    const bizRes = await axios.get('/api/businesses')
     const allBusinesses = bizRes.data.businesses || bizRes.data || []
 
     /* 3. Build { categoryId: count } map */
