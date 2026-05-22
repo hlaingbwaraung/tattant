@@ -6,6 +6,7 @@
  */
 
 const path = require('path')
+const fs = require('fs')
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
@@ -126,6 +127,24 @@ app.use('/api/contact', require('./routes/contactRoutes'))
 app.use('/api/visits', require('./routes/visitRoutes'))
 app.use('/api/settings', require('./routes/settingsRoutes'))
 app.use('/api/ai-search', require('./routes/aiSearchRoutes'))
+
+/* ========================================
+ *  5b. Production Frontend
+ * ======================================== */
+const clientDistPath = path.resolve(__dirname, '..', '..', 'client', 'dist')
+const clientIndexPath = path.join(clientDistPath, 'index.html')
+
+if (process.env.NODE_ENV === 'production' && fs.existsSync(clientIndexPath)) {
+  app.use(express.static(clientDistPath, {
+    maxAge: '1y',
+    immutable: true,
+    index: false
+  }))
+
+  app.get(/^(?!\/api\/|\/health$).*/, (_req, res) => {
+    res.sendFile(clientIndexPath)
+  })
+}
 
 /* ========================================
  *  6. Error Handling

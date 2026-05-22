@@ -7,11 +7,11 @@ databases:
 services:
   - type: web
     plan: free
-    name: tattant-api
+    name: tattant
     runtime: node
-    rootDir: server
-    buildCommand: npm install && npx sequelize-cli db:migrate
-    startCommand: node src/server.js
+    buildCommand: npm --prefix server ci --include=dev && npm --prefix client ci --include=dev && npm --prefix client run build && cd server && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all
+    startCommand: node server/src/server.js
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -19,10 +19,14 @@ services:
         fromDatabase:
           name: tattant-db
           property: connectionString
+      - key: DB_SSL
+        value: true
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
         value: https://tattant.com
+      - key: VITE_API_URL
+        value: /api
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
