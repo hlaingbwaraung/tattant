@@ -62,6 +62,12 @@ Write-Host "  [OK] Backend deployed!" -ForegroundColor Green
 # Step 2: Deploy Frontend
 Write-Host ""
 Write-Host "[2/4] Deploying Frontend..." -ForegroundColor Yellow
+Write-Host "  > Building frontend for production..." -ForegroundColor Gray
+$env:VITE_API_URL = "/api"
+Push-Location client
+npm run build
+Pop-Location
+
 Write-Host "  > Creating backup on server..." -ForegroundColor Gray
 ssh -i $SSH_KEY $EC2_CONN "sudo cp -r /var/www/tattant /var/www/tattant-backup-`$(date +%Y%m%d-%H%M%S) 2>/dev/null || echo 'No backup needed'"
 
@@ -85,7 +91,7 @@ Write-Host "  [OK] Nginx reloaded!" -ForegroundColor Green
 Write-Host ""
 Write-Host "[4/4] Verifying Deployment..." -ForegroundColor Yellow
 Write-Host "--- Backend Status ---" -ForegroundColor Gray
-ssh -i $SSH_KEY $EC2_CONN "pm2 status tattant-api"
+ssh -i $SSH_KEY $EC2_CONN "pm2 status tattant-server"
 Write-Host ""
 Write-Host "--- Frontend Files ---" -ForegroundColor Gray
 ssh -i $SSH_KEY $EC2_CONN "ls -lh /var/www/tattant/index.html"
