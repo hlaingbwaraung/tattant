@@ -1,6 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <circle cx="24" cy="24" r="21" fill="#d4af37"/>
-  <circle cx="34" cy="14" r="5" fill="#e85d4f" stroke="#0c0c14" stroke-width="2"/>
-  <path d="M13 14h22v6h-8v18h-6V20h-8z" fill="#0c0c14"/>
-  <path d="M15 32c5.7 4.4 12.3 4.4 18 0" fill="none" stroke="#0c0c14" stroke-width="3" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Tattant">
+  <defs>
+    <linearGradient id="tattant-mark-bg" x1="7" y1="5" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f6c453"/>
+      <stop offset="0.52" stop-color="#d59622"/>
+      <stop offset="1" stop-color="#7c4f12"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="40" height="40" rx="13" fill="#10131b"/>
+  <rect x="6.5" y="6.5" width="35" height="35" rx="11" fill="url(#tattant-mark-bg)"/>
+  <circle cx="35" cy="13" r="5.5" fill="#f05a4f"/>
+  <path d="M14 32c5.6-6.9 14.4-6.9 20 0" fill="none" stroke="#10131b" stroke-width="3.25" stroke-linecap="round"/>
+  <path d="M15 15h19v5.3h-6.5V34h-6V20.3H15z" fill="#10131b"/>
+  <path d="M18.8 36.2h10.4" fill="none" stroke="#fff8df" stroke-width="2.4" stroke-linecap="round" opacity="0.9"/>
 </svg>
