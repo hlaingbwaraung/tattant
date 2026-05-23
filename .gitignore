@@ -29,7 +29,6 @@ server/dist/
 # Logs
 logs/
 *.log
-.codex-run/
 
 # Database
 *.sql
