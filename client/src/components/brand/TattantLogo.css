@@ -11,35 +11,45 @@
   width: 1.85em;
   height: 1.85em;
   flex: 0 0 auto;
-  filter: drop-shadow(0 2px 6px rgba(184, 134, 11, 0.28));
+  filter: drop-shadow(0 2px 8px rgba(124, 79, 18, 0.26));
 }
 
-.tattant-logo__disc {
-  fill: #d4af37;
+.tattant-logo__frame {
+  fill: #10131b;
+}
+
+.tattant-logo__plate {
+  fill: #d59622;
 }
 
 .tattant-logo__sun {
-  fill: #e85d4f;
-  stroke: #0c0c14;
-  stroke-width: 2;
+  fill: #f05a4f;
 }
 
 .tattant-logo__t {
-  fill: #0c0c14;
+  fill: #10131b;
 }
 
-.tattant-logo__path {
+.tattant-logo__route {
   fill: none;
-  stroke: #0c0c14;
-  stroke-width: 3;
+  stroke: #10131b;
+  stroke-width: 3.25;
   stroke-linecap: round;
+}
+
+.tattant-logo__spark {
+  fill: none;
+  stroke: #fff8df;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0.9;
 }
 
 .tattant-logo__word {
   font-family: var(--font-display, Georgia, serif);
   font-size: 1em;
   font-weight: 800;
-  background: var(--color-primary-gradient, linear-gradient(135deg, #d4af37, #b8860b));
+  background: linear-gradient(135deg, #f0b83e 0%, #b77717 58%, #6f4714 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
