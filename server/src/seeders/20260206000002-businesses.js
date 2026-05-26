@@ -444,13 +444,26 @@ module.exports = {
       }
     ]
 
+    const existing = await queryInterface.sequelize.query(
+      'SELECT name FROM businesses WHERE name IN (:names);',
+      {
+        replacements: { names: businesses.map(biz => biz.name) },
+        type: Sequelize.QueryTypes.SELECT
+      }
+    )
+    const existingNames = new Set(existing.map(biz => biz.name))
+    const missingBusinesses = businesses
+      .filter(biz => biz.category_id && !existingNames.has(biz.name))
+
     // Stringify JSONB fields for bulkInsert
-    const processedBusinesses = businesses.map(biz => ({
+    const processedBusinesses = missingBusinesses.map(biz => ({
       ...biz,
       opening_hours: JSON.stringify(biz.opening_hours)
     }))
 
-    await queryInterface.bulkInsert('businesses', processedBusinesses, {})
+    if (processedBusinesses.length > 0) {
+      await queryInterface.bulkInsert('businesses', processedBusinesses, {})
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

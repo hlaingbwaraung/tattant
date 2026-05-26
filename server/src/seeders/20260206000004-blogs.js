@@ -9,7 +9,7 @@ module.exports = {
     )
     const authorId = users.length > 0 ? users[0].id : null
 
-    await queryInterface.bulkInsert('blogs', [
+    const blogs = [
       {
         title: 'The Ultimate Guide to Riding Japan\'s Shinkansen',
         slug: 'ultimate-guide-shinkansen',
@@ -170,7 +170,21 @@ module.exports = {
         created_at: new Date('2026-02-06'),
         updated_at: new Date('2026-02-06')
       }
-    ])
+    ]
+
+    const existing = await queryInterface.sequelize.query(
+      'SELECT slug FROM blogs WHERE slug IN (:slugs);',
+      {
+        replacements: { slugs: blogs.map(blog => blog.slug) },
+        type: Sequelize.QueryTypes.SELECT
+      }
+    )
+    const existingSlugs = new Set(existing.map(blog => blog.slug))
+    const missingBlogs = blogs.filter(blog => !existingSlugs.has(blog.slug))
+
+    if (missingBlogs.length > 0) {
+      await queryInterface.bulkInsert('blogs', missingBlogs, {})
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

@@ -45,6 +45,7 @@ Desktop.ini
 tmp/
 temp/
 *.tmp
+.codex-run/
 
 # Testing
 coverage/

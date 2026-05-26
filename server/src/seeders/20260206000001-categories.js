@@ -56,7 +56,19 @@ module.exports = {
       }
     ];
 
-    await queryInterface.bulkInsert('categories', categories, {});
+    const existing = await queryInterface.sequelize.query(
+      'SELECT slug FROM categories WHERE slug IN (:slugs);',
+      {
+        replacements: { slugs: categories.map(category => category.slug) },
+        type: Sequelize.QueryTypes.SELECT
+      }
+    );
+    const existingSlugs = new Set(existing.map(category => category.slug));
+    const missingCategories = categories.filter(category => !existingSlugs.has(category.slug));
+
+    if (missingCategories.length > 0) {
+      await queryInterface.bulkInsert('categories', missingCategories, {});
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

@@ -33,7 +33,19 @@ module.exports = {
       }
     ]
 
-    await queryInterface.bulkInsert('users', users, {})
+    const existing = await queryInterface.sequelize.query(
+      'SELECT email FROM users WHERE email IN (:emails);',
+      {
+        replacements: { emails: users.map(user => user.email) },
+        type: Sequelize.QueryTypes.SELECT
+      }
+    )
+    const existingEmails = new Set(existing.map(user => user.email))
+    const missingUsers = users.filter(user => !existingEmails.has(user.email))
+
+    if (missingUsers.length > 0) {
+      await queryInterface.bulkInsert('users', missingUsers, {})
+    }
   },
 
   down: async (queryInterface, Sequelize) => {
