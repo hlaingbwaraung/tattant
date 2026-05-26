@@ -132,6 +132,12 @@
   "category": {
     "simCards": "Phone & SIM cards",
     "simCardsDesc": "Stay connected with local SIM cards and plans",
+    "ramen": "Ramen",
+    "ramenDesc": "Find trusted ramen shops and noodle spots",
+    "sushi": "Sushi",
+    "sushiDesc": "Discover sushi restaurants and seafood dining",
+    "yakiniku": "Yakiniku",
+    "yakinikuDesc": "Explore Japanese BBQ and grill restaurants",
     "restaurants": "Restaurants",
     "restaurantsDesc": "Discover the best dining spots for expats",
     "realEstate": "Real Estate",
