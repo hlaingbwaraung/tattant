@@ -16,6 +16,13 @@ const { sendOtpEmail } = require('../services/emailService')
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production'
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d'
 const OTP_EXPIRY_MINUTES = 10
+const ADMIN_LOGIN_ID = 'admin'
+const ADMIN_LOGIN_EMAIL = 'admin@tattant.com'
+
+const normalizeLoginIdentifier = (identifier = '') => {
+  const trimmed = String(identifier).trim()
+  return trimmed.toLowerCase() === ADMIN_LOGIN_ID ? ADMIN_LOGIN_EMAIL : trimmed
+}
 
 // Register new user
 exports.register = async (req, res) => {
@@ -67,12 +74,17 @@ exports.register = async (req, res) => {
 // Login user
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, username, loginId, password } = req.body
+    const identifier = email || username || loginId
+
+    if (!identifier || !password) {
+      return res.status(400).json({ message: 'Email/Admin ID and password are required' })
+    }
 
     // Find user
-    const user = await User.findOne({ where: { email } })
+    const user = await User.findOne({ where: { email: normalizeLoginIdentifier(identifier) } })
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' })
+      return res.status(401).json({ message: 'Invalid email/Admin ID or password' })
     }
 
     // Check if user has a password (not a Google OAuth user)
@@ -83,7 +95,7 @@ exports.login = async (req, res) => {
     // Check password
     const isMatch = await bcrypt.compare(password, user.password_hash)
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' })
+      return res.status(401).json({ message: 'Invalid email/Admin ID or password' })
     }
 
     // Generate token

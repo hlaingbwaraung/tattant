@@ -72,6 +72,8 @@
     "email": "Email",
     "emailAddress": "Email Address",
     "enterEmail": "Enter your email",
+    "loginIdentifier": "Email or Admin ID",
+    "enterLoginIdentifier": "Enter your email or admin",
     "password": "Password",
     "enterPassword": "Enter your password",
     "confirmPassword": "Confirm Password",

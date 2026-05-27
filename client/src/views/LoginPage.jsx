@@ -108,9 +108,9 @@ export default function LoginPage() {
 
                         <form onSubmit={handleLogin} className="auth-form">
                             <div className="form-group">
-                                <label htmlFor="email" className="form-label">{t('auth.emailAddress')}</label>
-                                <input id="email" type="email" className={`form-input ${fieldErrors.email ? 'input-error' : ''}`} placeholder={t('auth.enterEmail')} value={email} onChange={e => { setEmail(e.target.value); setFieldErrors(f => ({ ...f, email: false })); setError('') }} required />
-                                {fieldErrors.email && <span className="field-error-hint">⚠ Check your email address</span>}
+                                <label htmlFor="email" className="form-label">{t('auth.loginIdentifier')}</label>
+                                <input id="email" type="text" autoComplete="username" className={`form-input ${fieldErrors.email ? 'input-error' : ''}`} placeholder={t('auth.enterLoginIdentifier')} value={email} onChange={e => { setEmail(e.target.value); setFieldErrors(f => ({ ...f, email: false })); setError('') }} required />
+                                {fieldErrors.email && <span className="field-error-hint">⚠ Check your login ID</span>}
                             </div>
 
                             <div className="form-group">

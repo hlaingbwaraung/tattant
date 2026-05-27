@@ -72,6 +72,8 @@
     "email": "အီးမေးလ်",
     "emailAddress": "အီးမေးလ်လိပ်စာ",
     "enterEmail": "သင့်အီးမေးလ်ကို ထည့်သွင်းပါ",
+    "loginIdentifier": "အီးမေးလ် / Admin ID",
+    "enterLoginIdentifier": "အီးမေးလ် သို့မဟုတ် admin ထည့်ပါ",
     "password": "စကားဝှက်",
     "enterPassword": "စကားဝှက်ကို ထည့်သွင်းပါ",
     "confirmPassword": "စကားဝှက်ကို အတည်ပြုရန်",

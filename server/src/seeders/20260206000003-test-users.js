@@ -4,13 +4,13 @@ const bcrypt = require('bcryptjs')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const hashedPassword = await bcrypt.hash('admin123', 10)
+    const adminPasswordHash = await bcrypt.hash('admin12345', 10)
 
     const users = [
       {
         id: uuidv4(),
         email: 'admin@tattant.com',
-        password_hash: hashedPassword,
+        password_hash: adminPasswordHash,
         google_id: null,
         name: 'Admin User',
         preferred_language: 'en',
@@ -46,6 +46,15 @@ module.exports = {
     if (missingUsers.length > 0) {
       await queryInterface.bulkInsert('users', missingUsers, {})
     }
+
+    await queryInterface.bulkUpdate('users', {
+      password_hash: adminPasswordHash,
+      is_admin: true,
+      email_verified: true,
+      updated_at: new Date()
+    }, {
+      email: 'admin@tattant.com'
+    })
   },
 
   down: async (queryInterface, Sequelize) => {
